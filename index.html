@@ -143,12 +143,22 @@
                     <span class="decision__card" aria-hidden="true"></span>
                     Falta + Roja
                 </button>
-            </div>
-
-            <div id="panel-feedback" class="feedback oculto" aria-live="polite">
-                <h3 id="feedback-resultado"></h3>
-                <p id="feedback-explicacion"></p>
-                <button id="btn-nueva-situacion" class="btn-siguiente">Siguiente jugada</button>
+                <button class="decision decision--penalty btn-opcion" data-decision="Penalti">
+                    <span class="decision__card" aria-hidden="true" style="background:var(--papel)"></span>
+                    Penalti
+                </button>
+                <button class="decision decision--penalty-yellow btn-opcion" data-decision="Penalti + Tarjeta Amarilla">
+                    <span class="decision__card" aria-hidden="true" style="background:var(--amarilla)"></span>
+                    Penalti + Amarilla
+                </button>
+                <button class="decision decision--goal btn-opcion" data-decision="Gol">
+                    <span class="decision__glyph" aria-hidden="true">⚽</span>
+                    Gol
+                </button>
+                <button class="decision decision--offside btn-opcion" data-decision="Fuera de juego">
+                    <span class="decision__glyph" aria-hidden="true">🚩</span>
+                    Fuera de juego
+                </button>
             </div>
         </section>
 
