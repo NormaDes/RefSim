@@ -95,9 +95,9 @@ const situacionesDB = [
 ];
 
 // ==========================================
-// 2. ESTADO DEL USUARIO (Con localStorage)
+// 2. ESTADO DEL USUARIO
 // ==========================================
-let usuarioState = JSON.parse(localStorage.getItem('refsim_user')) || {
+let usuarioState = {
     puntos: 0,
     aciertos: 0,
     totalJugadas: 0,
@@ -107,6 +107,7 @@ let usuarioState = JSON.parse(localStorage.getItem('refsim_user')) || {
 
 let marcadorActual = null;
 let situacionActual = null;
+let usuarioFirebaseActual = null; // Almacenará el objeto del usuario autenticado
 
 // ==========================================
 // 3. REFERENCIAS AL DOM
@@ -129,11 +130,55 @@ const statPrecision = document.getElementById('stat-precision');
 const statRacha = document.getElementById('stat-racha');
 
 // ==========================================
-// 4. FUNCIONES PRINCIPALES
+// 4. FUNCIONES PRINCIPALES Y FIREBASE SYNC
 // ==========================================
 
-function guardarProgreso() {
-    localStorage.setItem('refsim_user', JSON.stringify(usuarioState));
+async function guardarProgreso() {
+    // Si hay un usuario logueado en Firebase, guardamos sus datos en Firestore
+    if (usuarioFirebaseActual && window.refSimFirebase) {
+        const { db, doc, setDoc } = window.refSimFirebase;
+        try {
+            // Guardamos en la colección "usuarios" usando su UID único de Firebase
+            await setDoc(doc(db, "usuarios", usuarioFirebaseActual.uid), {
+                email: usuarioFirebaseActual.email,
+                puntos: usuarioState.puntos,
+                aciertos: usuarioState.aciertos,
+                totalJugadas: usuarioState.totalJugadas,
+                racha: usuarioState.racha,
+                maxRacha: usuarioState.maxRacha,
+                ultimaActualizacion: new Date()
+            }, { merge: true });
+        } catch (e) {
+            console.error("Error al guardar en Firestore:", e);
+        }
+    } else {
+        // Si no hay sesión, guardamos localmente en el navegador por respaldo
+        localStorage.setItem('refsim_user', JSON.stringify(usuarioState));
+    }
+}
+
+async function cargarProgresoNube(uid) {
+    if (!window.refSimFirebase) return;
+    const { db, doc, getDoc } = window.refSimFirebase;
+    try {
+        const docRef = doc(db, "usuarios", uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const datosCloud = docSnap.data();
+            usuarioState.puntos = datosCloud.puntos || 0;
+            usuarioState.aciertos = datosCloud.aciertos || 0;
+            usuarioState.totalJugadas = datosCloud.totalJugadas || 0;
+            usuarioState.racha = datosCloud.racha || 0;
+            usuarioState.maxRacha = datosCloud.maxRacha || 0;
+        } else {
+            // Si es su primera vez, inicializamos sus datos a 0 en la nube
+            await guardarProgreso();
+        }
+        actualizarMarcador();
+    } catch (e) {
+        console.error("Error al cargar de Firestore:", e);
+    }
 }
 
 function cargarNuevaSituacion() {
@@ -210,7 +255,7 @@ function actualizarMarcador() {
 }
 
 // ==========================================
-// 5. EVENTOS E INICIALIZACIÓN DEL JUEGO
+// 5. EVENTOS E INICIALIZACIÓN
 // ==========================================
 botonNuevaSituacion.addEventListener('click', cargarNuevaSituacion);
 
@@ -218,21 +263,25 @@ botonesOpcion.forEach(boton => {
     boton.addEventListener('click', evaluarDecision);
 });
 
+// Carga inicial por localStorage si no hay login previo
+const localTemp = localStorage.getItem('refsim_user');
+if (localTemp) {
+    usuarioState = JSON.parse(localTemp);
+}
 actualizarMarcador();
 cargarNuevaSituacion();
 
 // ==========================================
-// 6. GESTIÓN DE LA VENTANA MODAL Y FIREBASE
+// 6. GESTIÓN DE MODAL Y SESIÓN (FIREBASE)
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   const modalAuth = document.getElementById("auth-modal");
   const btnAbrirAuth = document.getElementById("btn-abrir-auth");
   const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
 
- // Abrir modal
+  // Abrir modal
   if (btnAbrirAuth && modalAuth) {
     btnAbrirAuth.addEventListener("click", () => {
-      console.log("¡Clic detectado en el botón!"); // Chivato
       modalAuth.style.display = "flex";
     });
   }
@@ -251,9 +300,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Conexión con Firebase
+  // Conexión con Firebase Auth & Firestore
   setTimeout(() => {
-    const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.refSimFirebase || {};
+    const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } = window.refSimFirebase || {};
     
     if (!auth) return;
 
@@ -262,6 +311,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const statusText = document.getElementById("auth-status");
     const btnLogin = document.getElementById("btn-login");
     const btnRegister = document.getElementById("btn-register");
+    const contenedorBotonAuth = btnAbrirAuth ? btnAbrirAuth.parentElement : null;
+
+    // Escuchar cambios de estado de sesión en tiempo real
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Usuario CONectado
+        usuarioFirebaseActual = user;
+        console.log("Usuario conectado:", user.email);
+        
+        // Cargamos sus puntos reales desde Firestore
+        await cargarProgresoNube(user.uid);
+
+        // Cambiar botón de la barra superior por Nombre + Cerrar Sesión
+        if (contenedorBotonAuth) {
+          let nombreCorto = user.email.split('@')[0];
+          contenedorBotonAuth.innerHTML = `
+            <span style="color: var(--amarilla); font-weight: 700; font-size: 0.85rem;">👤 ${nombreCorto}</span>
+            <button id="btn-cerrar-sesion" style="background: #E63946; color: white; border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">Cerrar sesión</button>
+          `;
+
+          document.getElementById("btn-cerrar-sesion").addEventListener("click", async () => {
+            await signOut(auth);
+            location.reload(); // Recarga para limpiar estado
+          });
+        }
+      } else {
+        // Usuario DESconectado
+        usuarioFirebaseActual = null;
+      }
+    });
 
     if (btnLogin && btnRegister && emailInput && passwordInput && statusText) {
       // Iniciar Sesión
@@ -272,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
           statusText.innerText = "¡Inicio de sesión exitoso!";
           setTimeout(() => { 
             if (modalAuth) modalAuth.style.display = "none"; 
-          }, 1500);
+          }, 1000);
         } catch (error) {
           statusText.style.color = "#E63946";
           statusText.innerText = "Error: " + error.message;
@@ -287,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
           statusText.innerText = "¡Cuenta creada con éxito!";
           setTimeout(() => { 
             if (modalAuth) modalAuth.style.display = "none"; 
-          }, 1500);
+          }, 1000);
         } catch (error) {
           statusText.style.color = "#E63946";
           statusText.innerText = "Error: " + error.message;
