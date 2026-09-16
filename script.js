@@ -303,15 +303,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const contenedorBotonAuth = btnAbrirAuth ? btnAbrirAuth.parentElement : null;
 
     onAuthStateChanged(auth, async (user) => {
+      // Buscamos un contenedor específico para la zona de autenticación
+      let authContainer = document.getElementById("auth-container-ui");
+      
+      // Si no existe en el HTML aún, lo creamos dinámicamente dentro de la cabecera
+      if (!authContainer && btnAbrirAuth) {
+        authContainer = document.createElement("div");
+        authContainer.id = "auth-container-ui";
+        authContainer.style.cssText = "display: flex; align-items: center; gap: 10px;";
+        btnAbrirAuth.parentNode.appendChild(authContainer);
+      }
+
       if (user) {
         usuarioFirebaseActual = user;
         
+        // Ocultamos el botón original de acceso
+        if (btnAbrirAuth) btnAbrirAuth.style.display = "none";
+
         // Descargamos sus puntos reales de la nube
         await cargarProgresoNube(user.uid);
 
-        if (contenedorBotonAuth) {
+        // Pintamos el nombre y el botón de cerrar sesión en su propio espacio sin tocar los puntos
+        if (authContainer) {
           let nombreCorto = user.email.split('@')[0];
-          contenedorBotonAuth.innerHTML = `
+          authContainer.innerHTML = `
             <span style="color: var(--amarilla); font-weight: 700; font-size: 0.85rem;">👤 ${nombreCorto}</span>
             <button id="btn-cerrar-sesion" style="background: #E63946; color: white; border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">Cerrar sesión</button>
           `;
@@ -323,7 +338,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } else {
         usuarioFirebaseActual = null;
-        // Si no hay sesión, dejamos los marcadores a cero
+        
+        // Si no hay sesión, mostramos el botón de acceso original y limpiamos el contenedor de usuario
+        if (btnAbrirAuth) btnAbrirAuth.style.display = "block";
+        if (authContainer) authContainer.innerHTML = "";
+
         usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
         actualizarMarcador();
       }
