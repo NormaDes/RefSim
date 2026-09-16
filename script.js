@@ -1,6 +1,8 @@
 // ==========================================
 // 1. BASE DE DATOS DE SITUACIONES (IFAB - Bilingüe)
 // ==========================================
+let indicesDisponibles = []; // 📌 Lista para el sistema aleatorio sin repetición
+
 const situacionesDB = [
     {
         id: 1,
@@ -252,7 +254,7 @@ const situacionesDB = [
         posY: 400,
         decisionCorrecta: "Falta + Tarjeta Amarilla",
         explicacion: "Regla 12: utilizar lenguaje o comportarse de forma ofensiva, insultante o humillante es una infracción sancionable con tiro libre indirecto y puede requerir tarjeta.",
-        explicacionEu: "12. Araua: Hizkuntza erasokorra, irainduzkoa edo umiliagarria erabiltzea edo horrela jokatzea jaurtiketa libre zeharkakoarekin zigortzeko moduko arau-haustea da eta txartela eska dezake."
+        explicacionEu: "12. Araua: Hizkuntza erasokorra, irainduzkoa edo umiliagarria erabiltzea edo horrela jokatzea jaurtiketa libre zeharkakoarekin zigortzeko moduko arau-haustea da eta txartel horia eska dezake."
     },
     {
         id: 22,
@@ -623,7 +625,19 @@ function cargarNuevaSituacion() {
     botonesOpcion.forEach(btn => btn.disabled = false);
 
     if (situacionesDB.length === 0) return;
-    const indiceAleatorio = Math.floor(Math.random() * situacionesDB.length);
+
+    // Si la lista de índices está vacía, rellenamos y barajamos los 50 elementos
+    if (indicesDisponibles.length === 0) {
+        indicesDisponibles = Array.from({ length: situacionesDB.length }, (_, i) => i);
+        // Algoritmo Fisher-Yates para mezcla aleatoria
+        for (let i = indicesDisponibles.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indicesDisponibles[i], indicesDisponibles[j]] = [indicesDisponibles[j], indicesDisponibles[i]];
+        }
+    }
+
+    // Extraemos la siguiente jugada aleatoria sin repetir de la lista
+    const indiceAleatorio = indicesDisponibles.pop();
     situacionActual = situacionesDB[indiceAleatorio];
 
     const idSituacion = document.getElementById('situacion-id');
@@ -660,14 +674,12 @@ function evaluarDecision(event) {
     const t = traducciones[idiomaActual];
     const botonesOpcion = document.querySelectorAll('.btn-opcion');
     
-    // --- AQUÍ ESTÁN LAS CLAVES ---
-    const panelFeedback = document.getElementById('panel-feedback'); // Asegúrate que el id en HTML sea id="panel-feedback"
-    const resultadoFeedback = document.getElementById('feedback-resultado'); // id="feedback-resultado"
-    const explicacionFeedback = document.getElementById('feedback-explicacion'); // id="feedback-explicacion"
+    const panelFeedback = document.getElementById('panel-feedback');
+    const resultadoFeedback = document.getElementById('feedback-resultado');
+    const explicacionFeedback = document.getElementById('feedback-explicacion');
 
     botonesOpcion.forEach(btn => btn.disabled = true);
     
-    // 1. Mostrar el panel quitando la clase oculto
     if (panelFeedback) {
         panelFeedback.classList.remove('oculto');
         panelFeedback.classList.remove('acierto', 'fallo');
@@ -693,7 +705,6 @@ function evaluarDecision(event) {
         if (resultadoFeedback) resultadoFeedback.textContent = `${t.falloMsg} (${t.decisionOficial} ${situacionActual.decisionCorrecta})`;
     }
 
-    // 2. Pintar la explicación oficial correspondiente
     const explicacionFinal = (idiomaActual === 'eu' && situacionActual.explicacionEu) ? situacionActual.explicacionEu : situacionActual.explicacion;
     if (explicacionFeedback) {
         explicacionFeedback.textContent = explicacionFinal;
@@ -810,7 +821,6 @@ async function cargarProgresoNube(uid) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Inicializar jugada y eventos de botones principales
     actualizarMarcadorInterfaz();
     cargarNuevaSituacion();
 
@@ -824,7 +834,6 @@ document.addEventListener("DOMContentLoaded", () => {
         boton.addEventListener('click', evaluarDecision);
     });
 
-    // 2. Selector de idioma
     const contenedorBanderas = document.getElementById("selector-idioma");
     if (contenedorBanderas) {
         contenedorBanderas.addEventListener("click", (e) => {
@@ -835,7 +844,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 3. Modal de Autenticación y Firebase
     const modalAuth = document.getElementById("auth-modal");
     const btnAbrirAuth = document.getElementById("btn-abrir-auth");
     const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
@@ -850,7 +858,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (modalAuth && e.target === modalAuth) { modalAuth.style.display = "none"; }
     });
 
-    // Comprobación segura de Firebase
     const verificarFirebaseInterval = setInterval(() => {
         if (window.refSimFirebase) {
             clearInterval(verificarFirebaseInterval);
