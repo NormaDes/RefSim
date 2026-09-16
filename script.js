@@ -171,10 +171,12 @@ async function cargarProgresoNube(uid) {
             usuarioState.maxRacha = datosCloud.maxRacha || 0;
             console.log("Datos cargados desde Firestore:", datosCloud);
         } else {
-            // Si no existe el documento en Firestore, lo creamos con 0 puntos
             await guardarProgreso();
         }
+        
+        // ¡Forzamos la actualización visual en pantalla aquí mismo!
         actualizarMarcador();
+        
     } catch (e) {
         console.error("Error al cargar de Firestore:", e);
     }
