@@ -58,10 +58,11 @@
                 </div>
             </dl>
             
-            <!-- Contenedor del Botón de Acceso / Usuario -->
-            <div id="auth-container-ui" style="display: flex; align-items: center; gap: 8px;">
-                <button id="btn-abrir-auth" style="background: var(--amarilla); color: var(--noche); border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">Acceso</button>
-            </div>
+            <!-- Botón de Acceso estático -->
+<button id="btn-abrir-auth" style="background: var(--amarilla); color: var(--noche); border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">Acceso</button>
+
+<!-- Contenedor dinámico exclusivo para cuando SÍ hay sesión iniciada (saluda y botón cerrar) -->
+<div id="auth-container-ui" style="display: flex; align-items: center; gap: 8px;"></div>
         </div>
     </header>
 
@@ -160,6 +161,11 @@
                     Fuera de juego
                 </button>
             </div>
+            <div id="panel-feedback" class="feedback oculto" aria-live="polite">
+    <h3 id="feedback-resultado"></h3>
+    <p id="feedback-explicacion"></p>
+    <button id="btn-nueva-situacion" class="btn-siguiente">Siguiente jugada</button>
+</div>
         </section>
 
     </main>

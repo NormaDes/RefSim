@@ -159,12 +159,19 @@ function evaluarDecision(event) {
     const decisionElegida = event.currentTarget.getAttribute('data-decision');
     const t = traducciones[idiomaActual];
     const botonesOpcion = document.querySelectorAll('.btn-opcion');
-    const panelFeedback = document.getElementById('panel-feedback');
-    const resultadoFeedback = document.getElementById('feedback-resultado');
-    const explicacionFeedback = document.getElementById('feedback-explicacion');
+    
+    // --- AQUÍ ESTÁN LAS CLAVES ---
+    const panelFeedback = document.getElementById('panel-feedback'); // Asegúrate que el id en HTML sea id="panel-feedback"
+    const resultadoFeedback = document.getElementById('feedback-resultado'); // id="feedback-resultado"
+    const explicacionFeedback = document.getElementById('feedback-explicacion'); // id="feedback-explicacion"
 
     botonesOpcion.forEach(btn => btn.disabled = true);
-    if (panelFeedback) panelFeedback.classList.remove('oculto');
+    
+    // 1. Mostrar el panel quitando la clase oculto
+    if (panelFeedback) {
+        panelFeedback.classList.remove('oculto');
+        panelFeedback.classList.remove('acierto', 'fallo');
+    }
 
     usuarioState.totalJugadas++;
 
@@ -186,8 +193,11 @@ function evaluarDecision(event) {
         if (resultadoFeedback) resultadoFeedback.textContent = `${t.falloMsg} (${t.decisionOficial} ${situacionActual.decisionCorrecta})`;
     }
 
+    // 2. Pintar la explicación oficial correspondiente
     const explicacionFinal = (idiomaActual === 'eu' && situacionActual.explicacionEu) ? situacionActual.explicacionEu : situacionActual.explicacion;
-    if (explicacionFeedback) explicacionFeedback.textContent = explicacionFinal;
+    if (explicacionFeedback) {
+        explicacionFeedback.textContent = explicacionFinal;
+    }
 
     actualizarMarcadorInterfaz();
     guardarProgresoNubeAuto();
