@@ -95,7 +95,7 @@ const situacionesDB = [
 ];
 
 // ==========================================
-// 2. ESTADO DEL USUARIO
+// 2. ESTADO DEL USUARIO (Sin localStorage para cuentas)
 // ==========================================
 let usuarioState = {
     puntos: 0,
@@ -130,10 +130,11 @@ const statPrecision = document.getElementById('stat-precision');
 const statRacha = document.getElementById('stat-racha');
 
 // ==========================================
-// 4. FUNCIONES DE SINCRONIZACIÓN CON FIRESTORE
+// 4. FUNCIONES DE SINCRONIZACIÓN EXCLUSIVA EN LA NUBE
 // ==========================================
 
 async function guardarProgreso() {
+    // Solo guarda en Firestore si hay sesión iniciada. Si no, los puntos son efímeros (modo invitado).
     if (usuarioFirebaseActual && window.refSimFirebase) {
         const { db, doc, setDoc } = window.refSimFirebase;
         try {
@@ -146,12 +147,9 @@ async function guardarProgreso() {
                 maxRacha: usuarioState.maxRacha,
                 ultimaActualizacion: new Date()
             }, { merge: true });
-            console.log("Progreso guardado en Firestore correctamente.");
         } catch (e) {
             console.error("Error al guardar en Firestore:", e);
         }
-    } else {
-        localStorage.setItem('refsim_user', JSON.stringify(usuarioState));
     }
 }
 
@@ -169,14 +167,12 @@ async function cargarProgresoNube(uid) {
             usuarioState.totalJugadas = datosCloud.totalJugadas || 0;
             usuarioState.racha = datosCloud.racha || 0;
             usuarioState.maxRacha = datosCloud.maxRacha || 0;
-            console.log("Datos cargados desde Firestore:", datosCloud);
         } else {
+            // Si no existe perfil en la nube, inicializamos a 0
+            usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
             await guardarProgreso();
         }
-        
-        // ¡Forzamos la actualización visual en pantalla aquí mismo!
         actualizarMarcador();
-        
     } catch (e) {
         console.error("Error al cargar de Firestore:", e);
     }
@@ -242,7 +238,7 @@ function evaluarDecision(event) {
     explicacionFeedback.textContent = situacionActual.explicacion;
 
     actualizarMarcador();
-    guardarProgreso(); // Guarda automáticamante en Firestore o localStorage
+    guardarProgreso(); // Solo guarda si hay cuenta en la nube
 }
 
 function actualizarMarcador() {
@@ -264,11 +260,7 @@ botonesOpcion.forEach(boton => {
     boton.addEventListener('click', evaluarDecision);
 });
 
-// Carga inicial temporal por localStorage mientras Firebase Auth responde
-const localTemp = localStorage.getItem('refsim_user');
-if (localTemp) {
-    usuarioState = JSON.parse(localTemp);
-}
+// Arranca por defecto a 0 si no hay sesión iniciada
 actualizarMarcador();
 cargarNuevaSituacion();
 
@@ -313,9 +305,8 @@ document.addEventListener("DOMContentLoaded", () => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         usuarioFirebaseActual = user;
-        console.log("Usuario detectado en sesión:", user.email);
         
-        // Descargamos los puntos específicos de este usuario desde Firestore
+        // Descargamos sus puntos reales de la nube
         await cargarProgresoNube(user.uid);
 
         if (contenedorBotonAuth) {
@@ -332,6 +323,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } else {
         usuarioFirebaseActual = null;
+        // Si no hay sesión, dejamos los marcadores a cero
+        usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
+        actualizarMarcador();
       }
     });
 
