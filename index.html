@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefSim - Simulador Arbitral</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>RefSim</h1>
+        <p>Simulador de situaciones arbitrales y toma de decisiones</p>
+    </header>
+
+    <main>
+        <!-- Marcador de Gamificación -->
+        <div id="marcador-container">
+            <div class="stat-box">
+                <span class="stat-label">Puntos</span>
+                <span id="stat-puntos" class="stat-valor">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Precisión</span>
+                <span id="stat-precision" class="stat-valor">0%</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Racha</span>
+                <span id="stat-racha" class="stat-valor">🔥 0</span>
+            </div>
+        </div>
+
+        <!-- Panel de la situación -->
+        <div id="panel-situacion">
+            <h2 id="situacion-titulo">Carga una situación para empezar</h2>
+            <p id="situacion-descripcion">Haz clic en "Nueva situación" para generar un lance de juego.</p>
+        </div>
+
+        <!-- Campo de fútbol -->
+        <div id="campo-container">
+            <div id="campo">
+                <div class="linea-central"></div>
+                <div class="circulo-central"></div>
+                <div class="area area-superior"></div>
+                <div class="area area-inferior"></div>
+            </div>
+        </div>
+
+        <!-- Opciones de decisión del árbitro -->
+        <div id="panel-decisiones">
+            <h3>¿Cuál es tu decisión?</h3>
+            <div class="botones-decision">
+                <button class="btn-opcion" data-decision="No hay falta">⚪ No hay falta</button>
+                <button class="btn-opcion" data-decision="Falta">🔵 Falta</button>
+                <button class="btn-opcion" data-decision="Falta + Tarjeta Amarilla">🟨 Falta + Amarilla</button>
+                <button class="btn-opcion" data-decision="Falta + Tarjeta Roja">🟥 Falta + Roja</button>
+            </div>
+        </div>
+
+        <!-- Panel de resultado y explicación IFAB -->
+        <div id="panel-feedback" class="oculto">
+            <h3 id="feedback-resultado"></h3>
+            <p id="feedback-explicacion"></p>
+        </div>
+
+        <button id="btn-nueva-situacion">🎲 Nueva situación</button>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
