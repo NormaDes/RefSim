@@ -4,49 +4,112 @@
 const situacionesDB = [
     {
         id: 1,
-        tipo: "Entrada",
+        tipo: "Entrada Brusca",
         descripcion: "Un defensor se tira al suelo a destiempo para disputar el balón y golpea fuertemente con los tacos en la espinilla del rival con fuerza desmedida.",
-        intensidad: "Muy alta",
         posX: 150,
         posY: 90,
         decisionCorrecta: "Falta + Tarjeta Roja",
-        explicacion: "Regla 12 (Faltas y conducta incorrecta): Las entradas que pongan en peligro la integridad física de un adversario o con fuerza desmedida deben ser sancionadas como juego brusco grave (Tarjeta Roja)."
+        explicacion: "Regla 12: Las entradas que pongan en peligro la integridad física de un adversario o con fuerza desmedida deben ser sancionadas como juego brusco grave (Tarjeta Roja)."
     },
     {
         id: 2,
-        tipo: "Agarrón",
-        descripcion: "Un delantero avanza hacia el área rival y el defensor lo agarra persistentemente de la camiseta cortando un ataque prometedor.",
-        intensidad: "Moderada",
+        tipo: "Agarrón Táctico",
+        descripcion: "Un delantero avanza en un contraataque prometedor hacia el área rival y el defensor lo agarra persistentemente de la camiseta para frenarlo.",
         posX: 210,
         posY: 200,
         decisionCorrecta: "Falta + Tarjeta Amarilla",
-        explicacion: "Regla 12: Cometer una infracción por contacto (agarrón) con el fin de interferir o cortar un ataque prometedor se sancionará con amonestación (Tarjeta Amarilla)."
+        explicacion: "Regla 12: Cometer una infracción por contacto (agarrón) para interferir o cortar un ataque prometedor se sancionará con Tarjeta Amarilla."
     },
     {
         id: 3,
-        tipo: "Carga",
-        descripcion: "Dos jugadores disputan un balón dividido hombro con hombro de manera reglamentaria, usando una fuerza moderada y sin usar los codos.",
-        intensidad: "Leve",
+        tipo: "Carga Reglamentaria",
+        descripcion: "Dos jugadores disputan un balón dividido hombro con hombro de manera reglamentaria, usando fuerza moderada y sin emplear los codos.",
         posX: 100,
         posY: 230,
         decisionCorrecta: "No hay falta",
-        explicacion: "Regla 12: La carga hombro con hombro está permitida cuando se realiza disputando la posición del balón de manera legal y sin emplear una fuerza desproporcionada."
+        explicacion: "Regla 12: La carga hombro con hombro está permitida siempre que se realice disputando la posición del balón de manera legal y sin fuerza desproporcionada."
+    },
+    {
+        id: 4,
+        tipo: "Mano en el Área",
+        descripcion: "Un defensor salta a bloquear un centro con los brazos abiertos de forma antinatural, ocupando más espacio. El balón impacta directamente en su mano.",
+        posX: 300,
+        posY: 180,
+        decisionCorrecta: "Falta + Tarjeta Amarilla",
+        explicacion: "Regla 12: Se considera infracción si un jugador toca el balón con la mano/brazo haciendo que su cuerpo ocupe más espacio de manera antinatural. Al cortar un tiro/centro peligroso en el área, sanciona penal y amonestación."
+    },
+    {
+        id: 5,
+        tipo: "Mano Accidental en Apoyo",
+        descripcion: "Un jugador cae al suelo tras una entrada y apoya su mano para amortiguar la caída. El balón rueda y toca accidentalmente su mano apoyada.",
+        posX: 250,
+        posY: 120,
+        decisionCorrecta: "No hay falta",
+        explicacion: "Regla 12: No se considerará infracción si la mano o el brazo están entre el cuerpo y el suelo para apoyar el cuerpo durante la caída de forma natural."
+    },
+    {
+        id: 6,
+        tipo: "Fuera de Juego Pasivo",
+        descripcion: "Un atacante está en posición de fuera de juego pero permanece inmóvil. Su compañero dispara a puerta desde lejos y marca gol directamente.",
+        posX: 280,
+        posY: 80,
+        decisionCorrecta: "No hay falta",
+        explicacion: "Regla 11: Estar en posición de fuera de juego no es infracción por sí solo si el jugador no interviene en el juego, no interfiere a un adversario ni saca ventaja de su posición."
+    },
+    {
+        id: 7,
+        tipo: "Uso de Codos en Salto",
+        descripcion: "Dos jugadores saltan por un balón aéreo. Uno de ellos abre voluntariamente el codo golpeando la cara del adversario sin disputa limpia.",
+        posX: 180,
+        posY: 150,
+        decisionCorrecta: "Falta + Tarjeta Roja",
+        explicacion: "Regla 12: El uso de los brazos/codos como arma contra la cabeza o cara de un rival se considera conducta violenta o juego brusco grave (Tarjeta Roja)."
+    },
+    {
+        id: 8,
+        tipo: "Zancadilla Leve",
+        descripcion: "En el medio campo, un mediocentro mete el pie tarde tropezando involuntariamente al rival, en una jugada sin peligro inminente de gol.",
+        posX: 160,
+        posY: 220,
+        decisionCorrecta: "Falta",
+        explicacion: "Regla 12: La impudencia al disputar el balón mediante una zancadilla se sanciona con libre directo sin necesidad de tarjeta disciplinaria si no corta un ataque prometedor."
+    },
+    {
+        id: 9,
+        tipo: "Sustituto en el Campo",
+        descripcion: "Un jugador sustituto entra al terreno de juego sin permiso del árbitro e intercepta un pase antes de que el balón salga del campo.",
+        posX: 220,
+        posY: 100,
+        decisionCorrecta: "Falta + Tarjeta Amarilla",
+        explicacion: "Regla 3: Si un sustituto entra al campo sin autorización e interfiere en el juego, se sancionará con libre directo/penal y amonestación (Tarjeta Amarilla)."
+    },
+    {
+        id: 10,
+        tipo: "Interferencia al Guardameta",
+        descripcion: "Un atacante se coloca justo delante del portero rival e impide que este saque rápidamente con las manos interponiéndose en su trayectoria.",
+        posX: 320,
+        posY: 210,
+        decisionCorrecta: "Falta + Tarjeta Amarilla",
+        explicacion: "Regla 12: Se sancionará con amonestación (Tarjeta Amarilla) e libre indirecto al jugador que impida al guardameta sacar el balón con las manos."
     }
 ];
 
 // ==========================================
-// 2. ESTADO DEL JUEGO (GAMIFICACIÓN)
+// 2. ESTADO DEL USUARIO (Con localStorage)
 // ==========================================
-let puntos = 0;
-let aciertos = 0;
-let totalJugadas = 0;
-let racha = 0;
+let usuarioState = JSON.parse(localStorage.getItem('refsim_user')) || {
+    puntos: 0,
+    aciertos: 0,
+    totalJugadas: 0,
+    racha: 0,
+    maxRacha: 0
+};
 
 let marcadorActual = null;
 let situacionActual = null;
 
 // ==========================================
-// 3. REFERENCIAS A ELEMENTOS DEL HTML
+// 3. REFERENCIAS AL DOM
 // ==========================================
 const campo = document.getElementById('campo');
 const botonNuevaSituacion = document.getElementById('btn-nueva-situacion');
@@ -60,14 +123,17 @@ const explicacionFeedback = document.getElementById('feedback-explicacion');
 
 const botonesOpcion = document.querySelectorAll('.btn-opcion');
 
-// Elementos del marcador
 const statPuntos = document.getElementById('stat-puntos');
 const statPrecision = document.getElementById('stat-precision');
 const statRacha = document.getElementById('stat-racha');
 
 // ==========================================
-// 4. FUNCIONES
+// 4. FUNCIONES PRINCIPALES
 // ==========================================
+
+function guardarProgreso() {
+    localStorage.setItem('refsim_user', JSON.stringify(usuarioState));
+}
 
 function cargarNuevaSituacion() {
     if (marcadorActual) {
@@ -105,42 +171,44 @@ function evaluarDecision(event) {
     botonesOpcion.forEach(btn => btn.disabled = true);
     panelFeedback.classList.remove('oculto');
 
-    // Incrementamos el total de situaciones evaluadas
-    totalJugadas++;
+    usuarioState.totalJugadas++;
 
     if (decisionElegida === situacionActual.decisionCorrecta) {
-        aciertos++;
-        racha++;
-        // Calculamos puntos base (100) más un bono por racha acumulada
-        const puntosGanados = 100 + (racha > 1 ? (racha - 1) * 20 : 0);
-        puntos += puntosGanados;
+        usuarioState.aciertos++;
+        usuarioState.racha++;
+        if (usuarioState.racha > usuarioState.maxRacha) {
+            usuarioState.maxRacha = usuarioState.racha;
+        }
+
+        const puntosGanados = 100 + (usuarioState.racha > 1 ? (usuarioState.racha - 1) * 20 : 0);
+        usuarioState.puntos += puntosGanados;
 
         panelFeedback.classList.add('acierto');
         resultadoFeedback.textContent = `¡DECISIÓN CORRECTA! 👏 (+${puntosGanados} pts)`;
     } else {
-        racha = 0; // Reiniciamos la racha si hay fallo
+        usuarioState.racha = 0;
         panelFeedback.classList.add('fallo');
         resultadoFeedback.textContent = `INCORRECTO ❌ (Decisión oficial: ${situacionActual.decisionCorrecta})`;
     }
 
     explicacionFeedback.textContent = situacionActual.explicacion;
 
-    // Actualizamos las estadísticas en el marcador
     actualizarMarcador();
+    guardarProgreso();
 }
 
 function actualizarMarcador() {
-    const precisionCalculada = totalJugadas > 0 
-        ? Math.round((aciertos / totalJugadas) * 100) 
+    const precisionCalculada = usuarioState.totalJugadas > 0 
+        ? Math.round((usuarioState.aciertos / usuarioState.totalJugadas) * 100) 
         : 0;
 
-    statPuntos.textContent = puntos;
+    statPuntos.textContent = usuarioState.puntos;
     statPrecision.textContent = `${precisionCalculada}%`;
-    statRacha.textContent = `🔥 ${racha}`;
+    statRacha.textContent = `🔥 ${usuarioState.racha}`;
 }
 
 // ==========================================
-// 5. ESCUCHADORES DE EVENTOS
+// 5. EVENTOS E INICIALIZACIÓN
 // ==========================================
 botonNuevaSituacion.addEventListener('click', cargarNuevaSituacion);
 
@@ -148,5 +216,5 @@ botonesOpcion.forEach(boton => {
     boton.addEventListener('click', evaluarDecision);
 });
 
-// Inicio
+actualizarMarcador();
 cargarNuevaSituacion();
