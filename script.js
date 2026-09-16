@@ -210,7 +210,7 @@ function actualizarMarcador() {
 }
 
 // ==========================================
-// 5. EVENTOS E INICIALIZACIÓN
+// 5. EVENTOS E INICIALIZACIÓN DEL JUEGO
 // ==========================================
 botonNuevaSituacion.addEventListener('click', cargarNuevaSituacion);
 
@@ -220,8 +220,37 @@ botonesOpcion.forEach(boton => {
 
 actualizarMarcador();
 cargarNuevaSituacion();
+
+// ==========================================
+// 6. GESTIÓN DE LA VENTANA MODAL Y FIREBASE
+// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-  // Esperamos un segundo a que Firebase cargue
+  const modalAuth = document.getElementById("auth-modal");
+  const btnAbrirAuth = document.getElementById("btn-abrir-auth");
+  const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
+
+  // Abrir modal
+  if (btnAbrirAuth && modalAuth) {
+    btnAbrirAuth.addEventListener("click", () => {
+      modalAuth.style.display = "flex";
+    });
+  }
+
+  // Cerrar modal con la "X"
+  if (btnCerrarAuth && modalAuth) {
+    btnCerrarAuth.addEventListener("click", () => {
+      modalAuth.style.display = "none";
+    });
+  }
+
+  // Cerrar modal haciendo clic fuera de la caja
+  window.addEventListener("click", (e) => {
+    if (modalAuth && e.target === modalAuth) {
+      modalAuth.style.display = "none";
+    }
+  });
+
+  // Conexión con Firebase
   setTimeout(() => {
     const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.refSimFirebase || {};
     
@@ -230,32 +259,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const emailInput = document.getElementById("user-email");
     const passwordInput = document.getElementById("user-password");
     const statusText = document.getElementById("auth-status");
-
-    // Si todavía no has puesto el HTML en el index.html, avísame y lo revisamos
     const btnLogin = document.getElementById("btn-login");
     const btnRegister = document.getElementById("btn-register");
 
-    if (btnLogin && btnRegister) {
-      // Botón de Iniciar Sesión
+    if (btnLogin && btnRegister && emailInput && passwordInput && statusText) {
+      // Iniciar Sesión
       btnLogin.addEventListener("click", async () => {
         try {
           await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-          statusText.style.color = "green";
+          statusText.style.color = "#2E9B5E"; // Verde césped
           statusText.innerText = "¡Inicio de sesión exitoso!";
+          setTimeout(() => { 
+            if (modalAuth) modalAuth.style.display = "none"; 
+          }, 1500);
         } catch (error) {
-          statusText.style.color = "red";
+          statusText.style.color = "#E63946"; // Roja
           statusText.innerText = "Error: " + error.message;
         }
       });
 
-      // Botón de Registrarse
+      // Registrarse
       btnRegister.addEventListener("click", async () => {
         try {
           await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-          statusText.style.color = "green";
+          statusText.style.color = "#2E9B5E"; // Verde césped
           statusText.innerText = "¡Cuenta creada con éxito!";
+          setTimeout(() => { 
+            if (modalAuth) modalAuth.style.display = "none"; 
+          }, 1500);
         } catch (error) {
-          statusText.style.color = "red";
+          statusText.style.color = "#E63946"; // Roja
           statusText.innerText = "Error: " + error.message;
         }
       });
