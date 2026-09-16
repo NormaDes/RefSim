@@ -380,7 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 1000);
 });
 // ==========================================
-// 7. MULTIDIOMA (Castellano / Euskera con Banderas)
+// 7. MULTIDIOMA (Castellano / Euskera)
 // ==========================================
 const traducciones = {
     es: {
@@ -388,7 +388,7 @@ const traducciones = {
         lblPuntos: "Puntos",
         lblPrecision: "Precisión",
         lblRacha: "Racha",
-        btnAcceso: "Acceso / Registro",
+        btnAcceso: "Acceso",
         varRepeticion: "VAR · Repetición de la jugada",
         btnNoFalta: "No hay falta",
         btnFalta: "Falta",
@@ -401,7 +401,7 @@ const traducciones = {
         lblPuntos: "Puntuak",
         lblPrecision: "Zehaztasuna",
         lblRacha: "Bolada",
-        btnAcceso: "Sartu / Erregistratu",
+        btnAcceso: "Sartu",
         varRepeticion: "VAR · Jokaldiaren errepikapena",
         btnNoFalta: "Ez da falta",
         btnFalta: "Falta",

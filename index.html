@@ -24,7 +24,7 @@
 <div class="broadcast">
 
     <!-- BARRA MARCADOR -->
-    <header class="scorebug">
+    <header class="scorebug" style="flex-wrap: wrap; gap: 10px;">
         <div class="scorebug__brand">
             <svg class="scorebug__mark" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <circle cx="17" cy="17" r="15.5" stroke="#F5C518" stroke-width="2"/>
@@ -36,11 +36,11 @@
             </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <!-- SELECTOR DE IDIOMA CON BANDERAS -->
-            <div style="display: flex; gap: 5px;" id="selector-idioma">
-                <button data-lang="es" style="background: var(--panel-alto); border: 1px solid var(--linea); padding: 4px 8px; border-radius: var(--radio-s); cursor: pointer; font-size: 1rem;" title="Castellano">🇪🇸</button>
-                <button data-lang="eu" style="background: var(--panel-alto); border: 1px solid var(--linea); padding: 4px 8px; border-radius: var(--radio-s); cursor: pointer; font-size: 1rem;" title="Euskera">🟢🔴</button>
+            <div style="display: flex; gap: 4px;" id="selector-idioma">
+                <button data-lang="es" style="background: var(--panel-alto); border: 1px solid var(--linea); padding: 4px 6px; border-radius: var(--radio-s); cursor: pointer; font-size: 0.9rem;" title="Castellano">🇪🇸</button>
+                <button data-lang="eu" style="background: var(--panel-alto); border: 1px solid var(--linea); padding: 4px 6px; border-radius: var(--radio-s); cursor: pointer; font-size: 0.9rem;" title="Euskera">🟢🔴</button>
             </div>
 
             <dl class="scorebug__stats">
@@ -57,12 +57,11 @@
                     <dd id="stat-racha">0</dd>
                 </div>
             </dl>
-            <!-- Botón de Acceso Superior -->
-            <button id="btn-abrir-auth" style="background: var(--amarilla); color: var(--noche); border: none; padding: 8px 14px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.85rem;">Acceso / Registro</button>
-        </div>
-            </dl>
-            <!-- Botón de Acceso Superior -->
-            <button id="btn-abrir-auth" style="background: var(--amarilla); color: var(--noche); border: none; padding: 8px 14px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.85rem;">Acceso / Registro</button>
+            
+            <!-- Contenedor del Botón de Acceso / Usuario -->
+            <div id="auth-container-ui" style="display: flex; align-items: center; gap: 8px;">
+                <button id="btn-abrir-auth" style="background: var(--amarilla); color: var(--noche); border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">Acceso</button>
+            </div>
         </div>
     </header>
 
