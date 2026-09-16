@@ -379,3 +379,80 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 1000);
 });
+// ==========================================
+// 7. MULTIDIOMA (Castellano / Euskera con Banderas)
+// ==========================================
+const traducciones = {
+    es: {
+        tagSimulador: "Simulador arbitral · Reglas del Juego IFAB",
+        lblPuntos: "Puntos",
+        lblPrecision: "Precisión",
+        lblRacha: "Racha",
+        btnAcceso: "Acceso / Registro",
+        varRepeticion: "VAR · Repetición de la jugada",
+        btnNoFalta: "No hay falta",
+        btnFalta: "Falta",
+        btnAmarilla: "Falta + Amarilla",
+        btnRoja: "Falta + Roja",
+        btnSiguiente: "Siguiente jugada"
+    },
+    eu: {
+        tagSimulador: "Epaile simulatzailea · IFAB Joko Arauak",
+        lblPuntos: "Puntuak",
+        lblPrecision: "Zehaztasuna",
+        lblRacha: "Bolada",
+        btnAcceso: "Sartu / Erregistratu",
+        varRepeticion: "VAR · Jokaldiaren errepikapena",
+        btnNoFalta: "Ez da falta",
+        btnFalta: "Falta",
+        btnAmarilla: "Falta + Txartel horia",
+        btnRoja: "Falta + Txartel gorria",
+        btnSiguiente: "Hurrengo jokaldia"
+    }
+};
+
+let idiomaActual = "es";
+
+document.addEventListener("DOMContentLoaded", () => {
+    const contenedorBanderas = document.getElementById("selector-idioma");
+    if (contenedorBanderas) {
+        contenedorBanderas.addEventListener("click", (e) => {
+            const boton = e.target.closest("button");
+            if (!boton) return;
+            
+            idiomaActual = boton.getAttribute("data-lang");
+            aplicarTraducciones();
+        });
+    }
+});
+
+function aplicarTraducciones() {
+    const t = traducciones[idiomaActual];
+    
+    const tag = document.querySelector('.scorebug__tag');
+    if (tag) tag.textContent = t.tagSimulador;
+
+    const lblP = document.getElementById('label-puntos');
+    const lblPrec = document.getElementById('label-precision');
+    const lblR = document.getElementById('label-racha');
+    if (lblP) lblP.textContent = t.lblPuntos;
+    if (lblPrec) lblPrec.textContent = t.lblPrecision;
+    if (lblR) lblR.textContent = t.lblRacha;
+
+    const btnAcceso = document.getElementById('btn-abrir-auth');
+    if (btnAcceso && !usuarioFirebaseActual) btnAcceso.textContent = t.btnAcceso;
+
+    const varText = document.querySelector('.monitor__bar span:last-child');
+    if (varText) varText.textContent = t.varRepeticion;
+
+    const botones = document.querySelectorAll('.btn-opcion');
+    if (botones.length >= 4) {
+        botones[0].innerHTML = `<span class="decision__glyph" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12.5L10 17.5L19 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> ${t.btnNoFalta}`;
+        botones[1].innerHTML = `<span class="decision__glyph" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.2"/><path d="M12 7v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.3" r="1.15" fill="currentColor"/></svg></span> ${t.btnFalta}`;
+        botones[2].innerHTML = `<span class="decision__card" aria-hidden="true"></span> ${t.btnAmarilla}`;
+        botones[3].innerHTML = `<span class="decision__card" aria-hidden="true"></span> ${t.btnRoja}`;
+    }
+
+    const btnSig = document.getElementById('btn-nueva-situacion');
+    if (btnSig) btnSig.textContent = t.btnSiguiente;
+}
