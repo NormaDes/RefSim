@@ -229,9 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAbrirAuth = document.getElementById("btn-abrir-auth");
   const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
 
-  // Abrir modal
+ // Abrir modal
   if (btnAbrirAuth && modalAuth) {
     btnAbrirAuth.addEventListener("click", () => {
+      console.log("¡Clic detectado en el botón!"); // Chivato
       modalAuth.style.display = "flex";
     });
   }
