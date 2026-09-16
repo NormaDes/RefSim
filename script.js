@@ -229,9 +229,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAbrirAuth = document.getElementById("btn-abrir-auth");
   const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
 
+  console.log("Modal encontrado:", modalAuth); // Chivato 1
+  console.log("Botón abrir encontrado:", btnAbrirAuth); // Chivato 2
+
   // Abrir modal
   if (btnAbrirAuth && modalAuth) {
     btnAbrirAuth.addEventListener("click", () => {
+      console.log("¡Hice clic en el botón de acceso!"); // Chivato 3
       modalAuth.style.display = "flex";
     });
   }
@@ -249,49 +253,3 @@ document.addEventListener("DOMContentLoaded", () => {
       modalAuth.style.display = "none";
     }
   });
-
-  // Conexión con Firebase
-  setTimeout(() => {
-    const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.refSimFirebase || {};
-    
-    if (!auth) return;
-
-    const emailInput = document.getElementById("user-email");
-    const passwordInput = document.getElementById("user-password");
-    const statusText = document.getElementById("auth-status");
-    const btnLogin = document.getElementById("btn-login");
-    const btnRegister = document.getElementById("btn-register");
-
-    if (btnLogin && btnRegister && emailInput && passwordInput && statusText) {
-      // Iniciar Sesión
-      btnLogin.addEventListener("click", async () => {
-        try {
-          await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-          statusText.style.color = "#2E9B5E"; // Verde césped
-          statusText.innerText = "¡Inicio de sesión exitoso!";
-          setTimeout(() => { 
-            if (modalAuth) modalAuth.style.display = "none"; 
-          }, 1500);
-        } catch (error) {
-          statusText.style.color = "#E63946"; // Roja
-          statusText.innerText = "Error: " + error.message;
-        }
-      });
-
-      // Registrarse
-      btnRegister.addEventListener("click", async () => {
-        try {
-          await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-          statusText.style.color = "#2E9B5E"; // Verde césped
-          statusText.innerText = "¡Cuenta creada con éxito!";
-          setTimeout(() => { 
-            if (modalAuth) modalAuth.style.display = "none"; 
-          }, 1500);
-        } catch (error) {
-          statusText.style.color = "#E63946"; // Roja
-          statusText.innerText = "Error: " + error.message;
-        }
-      });
-    }
-  }, 1000);
-});
