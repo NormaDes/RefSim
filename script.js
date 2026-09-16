@@ -929,4 +929,3 @@ function configurarAuthFirebase(modalAuth, btnAbrirAuth) {
         });
     }
 }
-proba egiteko
