@@ -107,7 +107,7 @@ let usuarioState = {
 
 let marcadorActual = null;
 let situacionActual = null;
-let usuarioFirebaseActual = null; // Almacenará el objeto del usuario autenticado
+let usuarioFirebaseActual = null;
 
 // ==========================================
 // 3. REFERENCIAS AL DOM
@@ -130,15 +130,13 @@ const statPrecision = document.getElementById('stat-precision');
 const statRacha = document.getElementById('stat-racha');
 
 // ==========================================
-// 4. FUNCIONES PRINCIPALES Y FIREBASE SYNC
+// 4. FUNCIONES DE SINCRONIZACIÓN CON FIRESTORE
 // ==========================================
 
 async function guardarProgreso() {
-    // Si hay un usuario logueado en Firebase, guardamos sus datos en Firestore
     if (usuarioFirebaseActual && window.refSimFirebase) {
         const { db, doc, setDoc } = window.refSimFirebase;
         try {
-            // Guardamos en la colección "usuarios" usando su UID único de Firebase
             await setDoc(doc(db, "usuarios", usuarioFirebaseActual.uid), {
                 email: usuarioFirebaseActual.email,
                 puntos: usuarioState.puntos,
@@ -148,11 +146,11 @@ async function guardarProgreso() {
                 maxRacha: usuarioState.maxRacha,
                 ultimaActualizacion: new Date()
             }, { merge: true });
+            console.log("Progreso guardado en Firestore correctamente.");
         } catch (e) {
             console.error("Error al guardar en Firestore:", e);
         }
     } else {
-        // Si no hay sesión, guardamos localmente en el navegador por respaldo
         localStorage.setItem('refsim_user', JSON.stringify(usuarioState));
     }
 }
@@ -171,8 +169,9 @@ async function cargarProgresoNube(uid) {
             usuarioState.totalJugadas = datosCloud.totalJugadas || 0;
             usuarioState.racha = datosCloud.racha || 0;
             usuarioState.maxRacha = datosCloud.maxRacha || 0;
+            console.log("Datos cargados desde Firestore:", datosCloud);
         } else {
-            // Si es su primera vez, inicializamos sus datos a 0 en la nube
+            // Si no existe el documento en Firestore, lo creamos con 0 puntos
             await guardarProgreso();
         }
         actualizarMarcador();
@@ -241,7 +240,7 @@ function evaluarDecision(event) {
     explicacionFeedback.textContent = situacionActual.explicacion;
 
     actualizarMarcador();
-    guardarProgreso();
+    guardarProgreso(); // Guarda automáticamante en Firestore o localStorage
 }
 
 function actualizarMarcador() {
@@ -263,7 +262,7 @@ botonesOpcion.forEach(boton => {
     boton.addEventListener('click', evaluarDecision);
 });
 
-// Carga inicial por localStorage si no hay login previo
+// Carga inicial temporal por localStorage mientras Firebase Auth responde
 const localTemp = localStorage.getItem('refsim_user');
 if (localTemp) {
     usuarioState = JSON.parse(localTemp);
@@ -279,28 +278,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAbrirAuth = document.getElementById("btn-abrir-auth");
   const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
 
-  // Abrir modal
   if (btnAbrirAuth && modalAuth) {
     btnAbrirAuth.addEventListener("click", () => {
       modalAuth.style.display = "flex";
     });
   }
 
-  // Cerrar modal con la "X"
   if (btnCerrarAuth && modalAuth) {
     btnCerrarAuth.addEventListener("click", () => {
       modalAuth.style.display = "none";
     });
   }
 
-  // Cerrar modal haciendo clic fuera de la caja
   window.addEventListener("click", (e) => {
     if (modalAuth && e.target === modalAuth) {
       modalAuth.style.display = "none";
     }
   });
 
-  // Conexión con Firebase Auth & Firestore
   setTimeout(() => {
     const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } = window.refSimFirebase || {};
     
@@ -313,17 +308,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnRegister = document.getElementById("btn-register");
     const contenedorBotonAuth = btnAbrirAuth ? btnAbrirAuth.parentElement : null;
 
-    // Escuchar cambios de estado de sesión en tiempo real
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Usuario CONectado
         usuarioFirebaseActual = user;
-        console.log("Usuario conectado:", user.email);
+        console.log("Usuario detectado en sesión:", user.email);
         
-        // Cargamos sus puntos reales desde Firestore
+        // Descargamos los puntos específicos de este usuario desde Firestore
         await cargarProgresoNube(user.uid);
 
-        // Cambiar botón de la barra superior por Nombre + Cerrar Sesión
         if (contenedorBotonAuth) {
           let nombreCorto = user.email.split('@')[0];
           contenedorBotonAuth.innerHTML = `
@@ -333,17 +325,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
           document.getElementById("btn-cerrar-sesion").addEventListener("click", async () => {
             await signOut(auth);
-            location.reload(); // Recarga para limpiar estado
+            location.reload();
           });
         }
       } else {
-        // Usuario DESconectado
         usuarioFirebaseActual = null;
       }
     });
 
     if (btnLogin && btnRegister && emailInput && passwordInput && statusText) {
-      // Iniciar Sesión
       btnLogin.addEventListener("click", async () => {
         try {
           await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
@@ -358,7 +348,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      // Registrarse
       btnRegister.addEventListener("click", async () => {
         try {
           await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
