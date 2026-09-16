@@ -1,4 +1,122 @@
 // ==========================================
+// 0. ESTADO GLOBAL E IDIOMAS
+// ==========================================
+let idiomaActual = localStorage.getItem("refsim_idioma") || "es";
+let situacionActual = null;
+let marcadorActual = null;
+let usuarioFirebaseActual = null;
+let usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
+
+// Lienzo de referencia de las coordenadas posX / posY de la base de datos.
+// El campo es fluido: convertimos esos px a % para que el marcador caiga
+// siempre en el mismo sitio en cualquier pantalla.
+const CAMPO_REF = { ancho: 760, alto: 450 };
+
+const traducciones = {
+    es: {
+        tagSimulador: "Simulador arbitral \u00b7 Reglas del Juego IFAB",
+        lblPuntos: "Puntos",
+        lblPrecision: "Precisi\u00f3n",
+        lblRacha: "Racha",
+        btnAcceso: "Acceso",
+        varRepeticion: "VAR \u00b7 Repetici\u00f3n de la jugada",
+        jugada: "Jugada",
+
+        btnNoFalta: "No hay falta",
+        btnFalta: "Falta",
+        btnAmarilla: "Falta + Amarilla",
+        btnRoja: "Falta + Roja",
+        btnPenalti: "Penalti",
+        btnPenaltiAmarilla: "Penalti + Amarilla",
+        btnGol: "Gol",
+        btnFueraDeJuego: "Fuera de juego",
+        btnSiguiente: "Siguiente jugada",
+
+        aciertoMsg: "Decisi\u00f3n correcta",
+        falloMsg: "Decisi\u00f3n incorrecta",
+        decisionOficial: "Decisi\u00f3n oficial:",
+
+        authTitulo: "Acceso a RefSim",
+        authIntro: "Entra para guardar tus puntos y tu racha en cualquier dispositivo.",
+        authEmail: "Correo electr\u00f3nico",
+        authPassword: "Contrase\u00f1a",
+        authLogin: "Iniciar sesi\u00f3n",
+        authRegister: "Crear cuenta",
+        authCerrarSesion: "Cerrar sesi\u00f3n",
+        authOk: "Sesi\u00f3n iniciada",
+        authCreada: "Cuenta creada",
+        authError: "No se ha podido completar:",
+
+        adLabel: "Publicidad",
+        footer: "\u00a9 2026 RefSim \u2014 Basado en las Reglas del Juego de la IFAB.",
+
+        nombreDecision: {
+            "No hay falta": "No hay falta",
+            "Falta": "Falta",
+            "Falta + Tarjeta Amarilla": "Falta + tarjeta amarilla",
+            "Falta + Tarjeta Roja": "Falta + tarjeta roja",
+            "Penalti": "Penalti",
+            "Penalti + Tarjeta Amarilla": "Penalti + tarjeta amarilla",
+            "Gol": "Gol",
+            "Fuera de juego": "Fuera de juego"
+        }
+    },
+
+    eu: {
+        tagSimulador: "Arbitraje simulagailua \u00b7 IFAB Jokoaren Arauak",
+        lblPuntos: "Puntuak",
+        lblPrecision: "Zehaztasuna",
+        lblRacha: "Bolada",
+        btnAcceso: "Sartu",
+        varRepeticion: "VAR \u00b7 Jokaldiaren errepikapena",
+        jugada: "Jokaldia",
+
+        btnNoFalta: "Ez dago faltarik",
+        btnFalta: "Falta",
+        btnAmarilla: "Falta + Horia",
+        btnRoja: "Falta + Gorria",
+        btnPenalti: "Penaltia",
+        btnPenaltiAmarilla: "Penaltia + Horia",
+        btnGol: "Gola",
+        btnFueraDeJuego: "Jokoz kanpo",
+        btnSiguiente: "Hurrengo jokaldia",
+
+        aciertoMsg: "Erabaki zuzena",
+        falloMsg: "Erabaki okerra",
+        decisionOficial: "Erabaki ofiziala:",
+
+        authTitulo: "RefSim-erako sarbidea",
+        authIntro: "Sartu zure puntuak eta bolada edozein gailutan gordetzeko.",
+        authEmail: "Helbide elektronikoa",
+        authPassword: "Pasahitza",
+        authLogin: "Saioa hasi",
+        authRegister: "Kontua sortu",
+        authCerrarSesion: "Saioa itxi",
+        authOk: "Saioa hasita",
+        authCreada: "Kontua sortuta",
+        authError: "Ezin izan da osatu:",
+
+        adLabel: "Publizitatea",
+        footer: "\u00a9 2026 RefSim \u2014 IFABen Jokoaren Arauetan oinarritua.",
+
+        nombreDecision: {
+            "No hay falta": "Ez dago faltarik",
+            "Falta": "Falta",
+            "Falta + Tarjeta Amarilla": "Falta + txartel horia",
+            "Falta + Tarjeta Roja": "Falta + txartel gorria",
+            "Penalti": "Penaltia",
+            "Penalti + Tarjeta Amarilla": "Penaltia + txartel horia",
+            "Gol": "Gola",
+            "Fuera de juego": "Jokoz kanpo"
+        }
+    }
+};
+
+function t() {
+    return traducciones[idiomaActual] || traducciones.es;
+}
+
+// ==========================================
 // 1. BASE DE DATOS DE SITUACIONES (IFAB - Bilingüe)
 // ==========================================
 let indicesDisponibles = []; // 📌 Lista para el sistema aleatorio sin repetición
@@ -622,7 +740,10 @@ function cargarNuevaSituacion() {
     }
 
     const botonesOpcion = document.querySelectorAll('.btn-opcion');
-    botonesOpcion.forEach(btn => btn.disabled = false);
+    botonesOpcion.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('es-correcta', 'es-elegida-fallo');
+    });
 
     if (situacionesDB.length === 0) return;
 
@@ -644,7 +765,7 @@ function cargarNuevaSituacion() {
     const tituloSituacion = document.getElementById('situacion-titulo');
     const descripcionSituacion = document.getElementById('situacion-descripcion');
 
-    if (idSituacion) idSituacion.textContent = `Jugada #${situacionActual.id}`;
+    if (idSituacion) idSituacion.textContent = `${t().jugada} #${situacionActual.id}`;
     
     if (tituloSituacion) {
         tituloSituacion.textContent = (idiomaActual === 'eu' && situacionActual.tipoEu) ? situacionActual.tipoEu : situacionActual.tipo;
@@ -662,8 +783,8 @@ function colocarMarcador(x, y) {
     
     marcadorActual = document.createElement('div');
     marcadorActual.classList.add('marcador-accion');
-    marcadorActual.style.left = `${x}px`;
-    marcadorActual.style.top = `${y}px`;
+    marcadorActual.style.left = `${(x / CAMPO_REF.ancho) * 100}%`;
+    marcadorActual.style.top = `${(y / CAMPO_REF.alto) * 100}%`;
     campo.appendChild(marcadorActual);
 }
 
@@ -671,14 +792,19 @@ function evaluarDecision(event) {
     if (!situacionActual) return;
 
     const decisionElegida = event.currentTarget.getAttribute('data-decision');
-    const t = traducciones[idiomaActual];
+    const txt = t();
     const botonesOpcion = document.querySelectorAll('.btn-opcion');
     
     const panelFeedback = document.getElementById('panel-feedback');
     const resultadoFeedback = document.getElementById('feedback-resultado');
     const explicacionFeedback = document.getElementById('feedback-explicacion');
 
-    botonesOpcion.forEach(btn => btn.disabled = true);
+    botonesOpcion.forEach(btn => {
+        btn.disabled = true;
+        if (btn.getAttribute('data-decision') === situacionActual.decisionCorrecta) {
+            btn.classList.add('es-correcta');
+        }
+    });
     
     if (panelFeedback) {
         panelFeedback.classList.remove('oculto');
@@ -698,11 +824,13 @@ function evaluarDecision(event) {
         usuarioState.puntos += puntosGanados;
 
         if (panelFeedback) panelFeedback.classList.add('acierto');
-        if (resultadoFeedback) resultadoFeedback.textContent = `${t.aciertoMsg} (+${puntosGanados} pts)`;
+        if (resultadoFeedback) resultadoFeedback.textContent = `${txt.aciertoMsg} (+${puntosGanados} pts)`;
     } else {
         usuarioState.racha = 0;
+        event.currentTarget.classList.add('es-elegida-fallo');
         if (panelFeedback) panelFeedback.classList.add('fallo');
-        if (resultadoFeedback) resultadoFeedback.textContent = `${t.falloMsg} (${t.decisionOficial} ${situacionActual.decisionCorrecta})`;
+        const nombreOficial = txt.nombreDecision[situacionActual.decisionCorrecta] || situacionActual.decisionCorrecta;
+        if (resultadoFeedback) resultadoFeedback.textContent = `${txt.falloMsg} (${txt.decisionOficial} ${nombreOficial})`;
     }
 
     const explicacionFinal = (idiomaActual === 'eu' && situacionActual.explicacionEu) ? situacionActual.explicacionEu : situacionActual.explicacion;
@@ -729,7 +857,7 @@ function actualizarMarcadorInterfaz() {
 }
 
 function aplicarTraducciones() {
-    const t = traducciones[idiomaActual];
+    const t = traducciones[idiomaActual] || traducciones.es;
     
     const tag = document.querySelector('.scorebug__tag');
     if (tag) tag.textContent = t.tagSimulador;
@@ -772,6 +900,36 @@ function aplicarTraducciones() {
             descripcionSituacion.textContent = (idiomaActual === 'eu' && situacionActual.descripcionEu) ? situacionActual.descripcionEu : situacionActual.descripcion;
         }
     }
+
+    // --- Etiqueta de la jugada ---
+    const idSit = document.getElementById('situacion-id');
+    if (idSit && situacionActual) idSit.textContent = `${t.jugada} #${situacionActual.id}`;
+
+    // --- Modal de acceso ---
+    const fijar = (selector, propiedad, valor) => {
+        const el = document.querySelector(selector);
+        if (el) el[propiedad] = valor;
+    };
+    fijar('#auth-titulo', 'textContent', t.authTitulo);
+    fijar('.auth-card__intro', 'textContent', t.authIntro);
+    fijar('#user-email', 'placeholder', t.authEmail);
+    fijar('#user-password', 'placeholder', t.authPassword);
+    fijar('#btn-login', 'textContent', t.authLogin);
+    fijar('#btn-register', 'textContent', t.authRegister);
+    fijar('#btn-cerrar-sesion', 'textContent', t.authCerrarSesion);
+
+    // --- Publicidad y pie ---
+    document.querySelectorAll('.ad-slot__label').forEach(el => { el.textContent = t.adLabel; });
+    fijar('.footer-legal p', 'textContent', t.footer);
+
+    // --- Bandera activa ---
+    document.querySelectorAll('#selector-idioma button').forEach(b => {
+        const activo = b.getAttribute('data-lang') === idiomaActual;
+        b.classList.toggle('is-activo', activo);
+        b.setAttribute('aria-pressed', activo ? 'true' : 'false');
+    });
+
+    document.documentElement.lang = idiomaActual;
 }
 
 // ==========================================
@@ -788,6 +946,7 @@ async function guardarProgresoNubeAuto() {
                 totalJugadas: usuarioState.totalJugadas,
                 racha: usuarioState.racha,
                 maxRacha: usuarioState.maxRacha,
+                idioma: idiomaActual,
                 ultimaActualizacion: new Date()
             }, { merge: true });
         } catch (e) {
@@ -810,6 +969,11 @@ async function cargarProgresoNube(uid) {
             usuarioState.totalJugadas = datosCloud.totalJugadas || 0;
             usuarioState.racha = datosCloud.racha || 0;
             usuarioState.maxRacha = datosCloud.maxRacha || 0;
+            if (datosCloud.idioma && datosCloud.idioma !== idiomaActual) {
+                idiomaActual = datosCloud.idioma;
+                localStorage.setItem("refsim_idioma", idiomaActual);
+                aplicarTraducciones();
+            }
         } else {
             usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
             await guardarProgresoNubeAuto();
@@ -823,6 +987,7 @@ async function cargarProgresoNube(uid) {
 document.addEventListener("DOMContentLoaded", () => {
     actualizarMarcadorInterfaz();
     cargarNuevaSituacion();
+    aplicarTraducciones();
 
     const botonNuevaSituacion = document.getElementById('btn-nueva-situacion');
     if (botonNuevaSituacion) {
@@ -840,7 +1005,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const boton = e.target.closest("button");
             if (!boton) return;
             idiomaActual = boton.getAttribute("data-lang");
+            localStorage.setItem("refsim_idioma", idiomaActual);
             aplicarTraducciones();
+            guardarProgresoNubeAuto();
         });
     }
 
@@ -894,7 +1061,7 @@ function configurarAuthFirebase(modalAuth, btnAbrirAuth) {
                 let nombreCorto = user.email.split('@')[0];
                 authContainer.innerHTML = `
                     <span style="color: var(--amarilla); font-weight: 700; font-size: 0.85rem;">👤 ${nombreCorto}</span>
-                    <button id="btn-cerrar-sesion" style="background: #E63946; color: white; border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">Cerrar sesión</button>
+                    <button id="btn-cerrar-sesion" style="background: #E63946; color: white; border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">${t().authCerrarSesion}</button>
                 `;
                 document.getElementById("btn-cerrar-sesion").addEventListener("click", async () => {
                     await signOut(auth);
@@ -915,11 +1082,11 @@ function configurarAuthFirebase(modalAuth, btnAbrirAuth) {
             try {
                 await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
                 statusText.style.color = "#2E9B5E";
-                statusText.innerText = "¡Inicio de sesión exitoso!";
+                statusText.innerText = t().authOk;
                 setTimeout(() => { if (modalAuth) modalAuth.style.display = "none"; }, 1000);
             } catch (error) {
                 statusText.style.color = "#E63946";
-                statusText.innerText = "Error: " + error.message;
+                statusText.innerText = t().authError + " " + error.message;
             }
         });
 
@@ -927,11 +1094,11 @@ function configurarAuthFirebase(modalAuth, btnAbrirAuth) {
             try {
                 await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
                 statusText.style.color = "#2E9B5E";
-                statusText.innerText = "¡Cuenta creada con éxito!";
+                statusText.innerText = t().authCreada;
                 setTimeout(() => { if (modalAuth) modalAuth.style.display = "none"; }, 1000);
             } catch (error) {
                 statusText.style.color = "#E63946";
-                statusText.innerText = "Error: " + error.message;
+                statusText.innerText = t().authError + " " + error.message;
             }
         });
     }

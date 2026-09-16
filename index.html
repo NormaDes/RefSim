@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RefSim — Simulador Arbitral IFAB</title>
 <meta name="description" content="Pon a prueba tus decisiones arbitrales según el reglamento IFAB en jugadas reales de fútbol.">
-<meta name="theme-color" content="#0A1512">
+<meta name="theme-color" content="#070E0C">
 <link rel="canonical" href="https://tudominio.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="RefSim — Simulador Arbitral IFAB">
@@ -24,7 +24,7 @@
 <div class="broadcast">
 
     <!-- BARRA MARCADOR -->
-    <header class="scorebug" style="flex-wrap: wrap; gap: 10px;">
+    <header class="scorebug">
         <div class="scorebug__brand">
             <svg class="scorebug__mark" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <circle cx="17" cy="17" r="15.5" stroke="#F5C518" stroke-width="2"/>
@@ -36,11 +36,11 @@
             </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <!-- SELECTOR DE IDIOMA CON BANDERAS -->
-            <div style="display: flex; gap: 4px;" id="selector-idioma">
-                <button data-lang="es" style="background: var(--panel-alto); border: 1px solid var(--linea); padding: 4px 6px; border-radius: var(--radio-s); cursor: pointer; font-size: 0.9rem;" title="Castellano">🇪🇸</button>
-                <button data-lang="eu" style="background: var(--panel-alto); border: 1px solid var(--linea); padding: 4px 6px; border-radius: var(--radio-s); cursor: pointer; font-size: 0.9rem;" title="Euskera">🟢🔴</button>
+        <div class="scorebug__controles">
+            <!-- SELECTOR DE IDIOMA -->
+            <div class="idioma" id="selector-idioma" role="group" aria-label="Idioma">
+                <button type="button" data-lang="es" class="is-activo" aria-pressed="true" title="Castellano">🇪🇸</button>
+                <button type="button" data-lang="eu" aria-pressed="false" title="Euskera">🟢🔴</button>
             </div>
 
             <dl class="scorebug__stats">
@@ -57,34 +57,34 @@
                     <dd id="stat-racha">0</dd>
                 </div>
             </dl>
-            
-            <!-- Botón de Acceso estático -->
-<button id="btn-abrir-auth" style="background: var(--amarilla); color: var(--noche); border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">Acceso</button>
 
-<!-- Contenedor dinámico exclusivo para cuando SÍ hay sesión iniciada (saluda y botón cerrar) -->
-<div id="auth-container-ui" style="display: flex; align-items: center; gap: 8px;"></div>
+            <button type="button" id="btn-abrir-auth" class="btn-acceso">Acceso</button>
+
+            <!-- Contenedor dinámico: saludo + cerrar sesión cuando hay sesión -->
+            <div id="auth-container-ui"></div>
         </div>
     </header>
 
-    <!-- VENTANA FLOTANTE (MODAL) DE AUTENTICACIÓN -->
-    <div id="auth-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: var(--panel); border: 1px solid var(--linea); padding: 25px; border-radius: var(--radio-m); width: 90%; max-width: 380px; position: relative; box-shadow: var(--sombra);">
-            <button id="btn-cerrar-auth" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: var(--papel); font-size: 1.2rem; cursor: pointer;">&times;</button>
-            <h3 style="margin-bottom: 15px; font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem;">Acceso a RefSim</h3>
-            
-            <input type="email" id="user-email" placeholder="Correo electrónico" style="display: block; width: 100%; margin-bottom: 12px; padding: 10px; background: var(--panel-alto); border: 1px solid var(--linea); color: var(--papel); border-radius: var(--radio-s);" />
-            <input type="password" id="user-password" placeholder="Contraseña" style="display: block; width: 100%; margin-bottom: 15px; padding: 10px; background: var(--panel-alto); border: 1px solid var(--linea); color: var(--papel); border-radius: var(--radio-s);" />
-            
-            <div style="display: flex; gap: 10px;">
-                <button id="btn-login" style="flex: 1; padding: 10px; background: var(--verde-cesped); color: var(--noche); border: none; border-radius: var(--radio-s); font-weight: 700; cursor: pointer;">Iniciar Sesión</button>
-                <button id="btn-register" style="flex: 1; padding: 10px; background: var(--amarilla); color: var(--noche); border: none; border-radius: var(--radio-s); font-weight: 700; cursor: pointer;">Registrarse</button>
+    <!-- MODAL DE AUTENTICACIÓN -->
+    <div id="auth-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="auth-titulo">
+        <div class="auth-card">
+            <button type="button" id="btn-cerrar-auth" class="auth-card__cerrar" aria-label="Cerrar">&times;</button>
+            <h3 id="auth-titulo">Acceso a RefSim</h3>
+            <p class="auth-card__intro">Entra para guardar tus puntos y tu racha en cualquier dispositivo.</p>
+
+            <input type="email" id="user-email" class="campo-texto" autocomplete="email" placeholder="Correo electrónico">
+            <input type="password" id="user-password" class="campo-texto" autocomplete="current-password" placeholder="Contraseña">
+
+            <div class="auth-card__acciones">
+                <button type="button" id="btn-login" class="btn-auth btn-auth--primario">Iniciar sesión</button>
+                <button type="button" id="btn-register" class="btn-auth btn-auth--secundario">Crear cuenta</button>
             </div>
-            
-            <p id="auth-status" style="margin-top: 15px; font-size: 13px; text-align: center; color: var(--tenue);"></p>
+
+            <p id="auth-status" aria-live="polite"></p>
         </div>
     </div>
 
-    <!-- ESPACIO PUBLICITARIO: BANNER SUPERIOR -->
+    <!-- PUBLICIDAD: BANNER SUPERIOR -->
     <div class="ad-slot ad-slot--banner">
         <span class="ad-slot__label">Publicidad</span>
         <div class="ad-slot__unit">
@@ -107,6 +107,7 @@
                 <span>VAR · Repetición de la jugada</span>
             </div>
             <div id="campo" class="pitch">
+                <div class="pitch__line pitch__line--borde"></div>
                 <div class="pitch__line pitch__area-izq"></div>
                 <div class="pitch__line pitch__area-chica-izq"></div>
                 <div class="pitch__line pitch__centro"></div>
@@ -117,10 +118,10 @@
         </section>
 
         <section class="panel">
-            <div class="tarjeta-situacion">
-    <span id="situacion-id">Jugada #0</span>
-    <h3 id="situacion-titulo">Cargando situación...</h3>
-    <p id="situacion-descripcion">Un momento, el árbitro revisa la jugada...</p>
+            <div class="situation">
+                <span id="situacion-id" class="situation__id">Jugada</span>
+                <h2 id="situacion-titulo">Cargando situación…</h2>
+                <p id="situacion-descripcion">Un momento, el árbitro revisa la jugada…</p>
             </div>
 
             <div class="decisions" role="group" aria-label="Elige tu decisión arbitral">
@@ -161,16 +162,17 @@
                     Fuera de juego
                 </button>
             </div>
+
             <div id="panel-feedback" class="feedback oculto" aria-live="polite">
-    <h3 id="feedback-resultado"></h3>
-    <p id="feedback-explicacion"></p>
-    <button id="btn-nueva-situacion" class="btn-siguiente">Siguiente jugada</button>
-</div>
+                <h3 id="feedback-resultado"></h3>
+                <p id="feedback-explicacion"></p>
+                <button type="button" id="btn-nueva-situacion" class="btn-siguiente">Siguiente jugada</button>
+            </div>
         </section>
 
     </main>
 
-    <!-- ESPACIO PUBLICITARIO: RECTÁNGULO INFERIOR -->
+    <!-- PUBLICIDAD: RECTÁNGULO INFERIOR -->
     <div class="ad-slot ad-slot--rectangle">
         <span class="ad-slot__label">Publicidad</span>
         <div class="ad-slot__unit">
