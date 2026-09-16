@@ -220,3 +220,45 @@ botonesOpcion.forEach(boton => {
 
 actualizarMarcador();
 cargarNuevaSituacion();
+document.addEventListener("DOMContentLoaded", () => {
+  // Esperamos un segundo a que Firebase cargue
+  setTimeout(() => {
+    const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.refSimFirebase || {};
+    
+    if (!auth) return;
+
+    const emailInput = document.getElementById("user-email");
+    const passwordInput = document.getElementById("user-password");
+    const statusText = document.getElementById("auth-status");
+
+    // Si todavía no has puesto el HTML en el index.html, avísame y lo revisamos
+    const btnLogin = document.getElementById("btn-login");
+    const btnRegister = document.getElementById("btn-register");
+
+    if (btnLogin && btnRegister) {
+      // Botón de Iniciar Sesión
+      btnLogin.addEventListener("click", async () => {
+        try {
+          await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+          statusText.style.color = "green";
+          statusText.innerText = "¡Inicio de sesión exitoso!";
+        } catch (error) {
+          statusText.style.color = "red";
+          statusText.innerText = "Error: " + error.message;
+        }
+      });
+
+      // Botón de Registrarse
+      btnRegister.addEventListener("click", async () => {
+        try {
+          await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+          statusText.style.color = "green";
+          statusText.innerText = "¡Cuenta creada con éxito!";
+        } catch (error) {
+          statusText.style.color = "red";
+          statusText.innerText = "Error: " + error.message;
+        }
+      });
+    }
+  }, 1000);
+});
