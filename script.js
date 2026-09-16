@@ -1,386 +1,78 @@
 // ==========================================
-// 1. BASE DE DATOS DE SITUACIONES (IFAB)
+// 1. BASE DE DATOS DE SITUACIONES (Castellano / Euskera)
 // ==========================================
 const situacionesDB = [
     {
         id: 1,
         tipo: "Entrada Brusca",
-        descripcion: "Un defensor se tira al suelo a destiempo para disputar el balón y golpea fuertemente con los tacos en la espinilla del rival con fuerza desmedida.",
-        posX: 150,
-        posY: 90,
+        tipoEu: "Sarrera Gogorra",
+        descripcion: "Un defensor se lanza al suelo a destiempo con fuerza excesiva en la medular, impactando claramente en la espinilla del rival.",
+        descripcionEu: "Defentsa bat zelai erdian denboraz kanpo lurrera botatzen da indar handiegiarekin, aurkariaren tibia kolpatuz.",
+        posX: 180,
+        posY: 140,
         decisionCorrecta: "Falta + Tarjeta Roja",
-        explicacion: "Regla 12: Las entradas que pongan en peligro la integridad física de un adversario o con fuerza desmedida deben ser sancionadas como juego brusco grave (Tarjeta Roja)."
+        explicacion: "Regla 12: Una entrada que pone en peligro la integridad física del adversario debe ser sancionada con expulsión (tarjeta roja).",
+        explicacionEu: "12. Araua: Aurkariaren osotasun fisikoa arriskuan jartzen duen sarrera bat kanporaketarekin (txartel gorria) zigortu behar da."
     },
     {
         id: 2,
-        tipo: "Agarrón Táctico",
-        descripcion: "Un delantero avanza en un contraataque prometedor hacia el área rival y el defensor lo agarra persistentemente de la camiseta para frenarlo.",
-        posX: 210,
-        posY: 200,
-        decisionCorrecta: "Falta + Tarjeta Amarilla",
-        explicacion: "Regla 12: Cometer una infracción por contacto (agarrón) para interferir o cortar un ataque prometedor se sancionará con Tarjeta Amarilla."
+        tipo: "Mano en el Área",
+        tipoEu: "Eskua Área Barruan",
+        descripcion: "Un remate a puerta golpea claramente en la mano separada y 'antinatural' de un defensa dentro del área penalti.",
+        descripcionEu: "Ateeratako jaurtiketa batek argi eta garbi jotzen du área barruan dagoen defentsa baten esku banandu eta 'naturalki kanpoko' batean.",
+        posX: 85,
+        posY: 110,
+        decisionCorrecta: "Penalti",
+        explicacion: "Regla 12: Se sanciona mano cuando el jugador hace su cuerpo artificialmente más grande o intercepta el balón con la mano separada del cuerpo.",
+        explicacionEu: "12. Araua: Eskua zigortzen da jokalariak bere gorputza artifizialki handiago egiten duenean edo baloia gorputzetik banandutako eskuarekin mozten duenean."
     },
     {
         id: 3,
-        tipo: "Carga Reglamentaria",
-        descripcion: "Dos jugadores disputan un balón dividido hombro con hombro de manera reglamentaria, usando fuerza moderada y sin emplear los codos.",
-        posX: 100,
-        posY: 230,
-        decisionCorrecta: "No hay falta",
-        explicacion: "Regla 12: La carga hombro con hombro está permitida siempre que se realice disputando la posición del balón de manera legal y sin fuerza desproporcionada."
+        tipo: "Cortar Contraataque",
+        tipoEu: "Kontraerasoa Moztu",
+        descripcion: "Un centrocampista agarra descaradamente de la camiseta a un atacante que se marchaba completamente solo hacia el portero.",
+        descripcionEu: "Erdilari batek argi eta garbi heltzen dio kamisetatik bakar-bakarrik atezainagatik zihoan erasotzaile bati.",
+        posX: 220,
+        posY: 190,
+        decisionCorrecta: "Falta + Tarjeta Amarilla",
+        explicacion: "Regla 12: Cortar un ataque prometedor mediante una acción antirreglamentaria (como un agarrón) se sanciona con amonestación.",
+        explicacionEu: "12. Araua: Eraso promesgarri bat legez kanpoko ekintza baten bidez moztea (heldu bat bezala) txartel horiarekin zigortzen da."
     },
     {
         id: 4,
-        tipo: "Mano en el Área",
-        descripcion: "Un defensor salta a bloquear un centro con los brazos abiertos de forma antinatural, ocupando más espacio. El balón impacta directamente en su mano.",
-        posX: 300,
-        posY: 180,
-        decisionCorrecta: "Falta + Tarjeta Amarilla",
-        explicacion: "Regla 12: Se considera infracción si un jugador toca el balón con la mano/brazo haciendo que su cuerpo ocupe más espacio de manera antinatural. Al cortar un tiro/centro peligroso en el área, sanciona penal y amonestación."
+        tipo: "Simulación en el Área",
+        tipoEu: "Simulazioa Área Barruan",
+        descripcion: "Un delantero se deja caer teatralmente dentro del área pequeña sin que ningún defensa le haya hecho ningún tipo de contacto.",
+        descripcionEu: "Aurrelari bat modu teatralean erortzen da área txikian, inongo defentsak ukipenik egin gabe.",
+        posX: 60,
+        posY: 130,
+        decisionCorrecta: "Tarjeta Amarilla por Simulación",
+        explicacion: "Regla 12: Engañar deliberadamente al árbitro fingiendo una falta o un contacto inexistente se castiga con tarjeta amarilla por simulación.",
+        explicacionEu: "12. Araua: Epailea nahita iruzurtzea falta edo ukipen faltsu bat simulatuz txartel horiarekin zigortzen da."
     },
     {
         id: 5,
-        tipo: "Mano Accidental en Apoyo",
-        descripcion: "Un jugador cae al suelo tras una entrada y apoya su mano para amortiguar la caída. El balón rueda y toca accidentalmente su mano apoyada.",
-        posX: 250,
-        posY: 120,
-        decisionCorrecta: "No hay falta",
-        explicacion: "Regla 12: No se considerará infracción si la mano o el brazo están entre el cuerpo y el suelo para apoyar el cuerpo durante la caída de forma natural."
-    },
-    {
-        id: 6,
-        tipo: "Fuera de Juego Pasivo",
-        descripcion: "Un atacante está en posición de fuera de juego pero permanece inmóvil. Su compañero dispara a puerta desde lejos y marca gol directamente.",
-        posX: 280,
+        tipo: "Carga Legal",
+        tipoEu: "Karga Legala",
+        descripcion: "Dos jugadores luchan cuerpo a cuerpo por el balón usando el hombro de forma justa, sin emplear fuerza desmedida.",
+        descripcionEu: "Bi jokalari gorputzez gorputz borrokatzen dira baloiarako sorbalda modu zuzenean erabiliz, gehiegizko indarrik gabe.",
+        posX: 140,
         posY: 80,
         decisionCorrecta: "No hay falta",
-        explicacion: "Regla 11: Estar en posición de fuera de juego no es infracción por sí solo si el jugador no interviene en el juego, no interfiere a un adversario ni saca ventaja de su posición."
-    },
-    {
-        id: 7,
-        tipo: "Uso de Codos en Salto",
-        descripcion: "Dos jugadores saltan por un balón aéreo. Uno de ellos abre voluntariamente el codo golpeando la cara del adversario sin disputa limpia.",
-        posX: 180,
-        posY: 150,
-        decisionCorrecta: "Falta + Tarjeta Roja",
-        explicacion: "Regla 12: El uso de los brazos/codos como arma contra la cabeza o cara de un rival se considera conducta violenta o juego brusco grave (Tarjeta Roja)."
-    },
-    {
-        id: 8,
-        tipo: "Zancadilla Leve",
-        descripcion: "En el medio campo, un mediocentro mete el pie tarde tropezando involuntariamente al rival, en una jugada sin peligro inminente de gol.",
-        posX: 160,
-        posY: 220,
-        decisionCorrecta: "Falta",
-        explicacion: "Regla 12: La impudencia al disputar el balón mediante una zancadilla se sanciona con libre directo sin necesidad de tarjeta disciplinaria si no corta un ataque prometedor."
-    },
-    {
-        id: 9,
-        tipo: "Sustituto en el Campo",
-        descripcion: "Un jugador sustituto entra al terreno de juego sin permiso del árbitro e intercepta un pase antes de que el balón salga del campo.",
-        posX: 220,
-        posY: 100,
-        decisionCorrecta: "Falta + Tarjeta Amarilla",
-        explicacion: "Regla 3: Si un sustituto entra al campo sin autorización e interfiere en el juego, se sancionará con libre directo/penal y amonestación (Tarjeta Amarilla)."
-    },
-    {
-        id: 10,
-        tipo: "Interferencia al Guardameta",
-        descripcion: "Un atacante se coloca justo delante del portero rival e impide que este saque rápidamente con las manos interponiéndose en su trayectoria.",
-        posX: 320,
-        posY: 210,
-        decisionCorrecta: "Falta + Tarjeta Amarilla",
-        explicacion: "Regla 12: Se sancionará con amonestación (Tarjeta Amarilla) e libre indirecto al jugador que impida al guardameta sacar el balón con las manos."
+        explicacion: "Regla 12: Una carga disputada hombro con hombro dentro de los límites de una lucha justa por el balón es un contacto totalmente lícito.",
+        explicacionEu: "12. Araua: Baloiarako borroka zuzen baten barruan sorbalda-sorbalda egindako karga erabat legezkotzat jotzen da."
     }
 ];
 
-// ==========================================
-// 2. ESTADO DEL USUARIO (Sin localStorage para cuentas)
-// ==========================================
-let usuarioState = {
-    puntos: 0,
-    aciertos: 0,
-    totalJugadas: 0,
-    racha: 0,
-    maxRacha: 0
-};
-
-let marcadorActual = null;
 let situacionActual = null;
-let usuarioFirebaseActual = null;
+let puntos = 0;
+let aciertosTotales = 0;
+let jugadasTotales = 0;
+let rachaActual = 0;
+let idiomaActual = "es"; // Idioma por defecto
 
 // ==========================================
-// 3. REFERENCIAS AL DOM
-// ==========================================
-const campo = document.getElementById('campo');
-const botonNuevaSituacion = document.getElementById('btn-nueva-situacion');
-
-const idSituacion = document.getElementById('situacion-id');
-const tituloSituacion = document.getElementById('situacion-titulo');
-const descripcionSituacion = document.getElementById('situacion-descripcion');
-
-const panelFeedback = document.getElementById('panel-feedback');
-const resultadoFeedback = document.getElementById('feedback-resultado');
-const explicacionFeedback = document.getElementById('feedback-explicacion');
-
-const botonesOpcion = document.querySelectorAll('.btn-opcion');
-
-const statPuntos = document.getElementById('stat-puntos');
-const statPrecision = document.getElementById('stat-precision');
-const statRacha = document.getElementById('stat-racha');
-
-// ==========================================
-// 4. FUNCIONES DE SINCRONIZACIÓN EXCLUSIVA EN LA NUBE
-// ==========================================
-
-async function guardarProgreso() {
-    // Solo guarda en Firestore si hay sesión iniciada. Si no, los puntos son efímeros (modo invitado).
-    if (usuarioFirebaseActual && window.refSimFirebase) {
-        const { db, doc, setDoc } = window.refSimFirebase;
-        try {
-            await setDoc(doc(db, "usuarios", usuarioFirebaseActual.uid), {
-                email: usuarioFirebaseActual.email,
-                puntos: usuarioState.puntos,
-                aciertos: usuarioState.aciertos,
-                totalJugadas: usuarioState.totalJugadas,
-                racha: usuarioState.racha,
-                maxRacha: usuarioState.maxRacha,
-                ultimaActualizacion: new Date()
-            }, { merge: true });
-        } catch (e) {
-            console.error("Error al guardar en Firestore:", e);
-        }
-    }
-}
-
-async function cargarProgresoNube(uid) {
-    if (!window.refSimFirebase) return;
-    const { db, doc, getDoc } = window.refSimFirebase;
-    try {
-        const docRef = doc(db, "usuarios", uid);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-            const datosCloud = docSnap.data();
-            usuarioState.puntos = datosCloud.puntos || 0;
-            usuarioState.aciertos = datosCloud.aciertos || 0;
-            usuarioState.totalJugadas = datosCloud.totalJugadas || 0;
-            usuarioState.racha = datosCloud.racha || 0;
-            usuarioState.maxRacha = datosCloud.maxRacha || 0;
-        } else {
-            // Si no existe perfil en la nube, inicializamos a 0
-            usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
-            await guardarProgreso();
-        }
-        actualizarMarcador();
-    } catch (e) {
-        console.error("Error al cargar de Firestore:", e);
-    }
-}
-
-function cargarNuevaSituacion() {
-    if (marcadorActual) {
-        marcadorActual.remove();
-        marcadorActual = null;
-    }
-    
-    panelFeedback.classList.add('oculto');
-    panelFeedback.classList.remove('acierto', 'fallo');
-
-    botonesOpcion.forEach(btn => btn.disabled = false);
-
-    const indiceAleatorio = Math.floor(Math.random() * situacionesDB.length);
-    situacionActual = situacionesDB[indiceAleatorio];
-
-    idSituacion.textContent = `Jugada #${situacionActual.id}`;
-    tituloSituacion.textContent = situacionActual.tipo;
-    descripcionSituacion.textContent = situacionActual.descripcion;
-
-    colocarMarcador(situacionActual.posX, situacionActual.posY);
-}
-
-function colocarMarcador(x, y) {
-    marcadorActual = document.createElement('div');
-    marcadorActual.classList.add('marcador-accion');
-    marcadorActual.style.left = `${x}px`;
-    marcadorActual.style.top = `${y}px`;
-    campo.appendChild(marcadorActual);
-}
-
-function evaluarDecision(event) {
-    if (!situacionActual) return;
-
-    const decisionElegida = event.target.getAttribute('data-decision');
-
-    botonesOpcion.forEach(btn => btn.disabled = true);
-    panelFeedback.classList.remove('oculto');
-
-    usuarioState.totalJugadas++;
-
-    if (decisionElegida === situacionActual.decisionCorrecta) {
-        usuarioState.aciertos++;
-        usuarioState.racha++;
-        if (usuarioState.racha > usuarioState.maxRacha) {
-            usuarioState.maxRacha = usuarioState.racha;
-        }
-
-        const puntosGanados = 100 + (usuarioState.racha > 1 ? (usuarioState.racha - 1) * 20 : 0);
-        usuarioState.puntos += puntosGanados;
-
-        panelFeedback.classList.add('acierto');
-        resultadoFeedback.textContent = `¡DECISIÓN CORRECTA! 👏 (+${puntosGanados} pts)`;
-    } else {
-        usuarioState.racha = 0;
-        panelFeedback.classList.add('fallo');
-        resultadoFeedback.textContent = `INCORRECTO ❌ (Decisión oficial: ${situacionActual.decisionCorrecta})`;
-    }
-
-    explicacionFeedback.textContent = situacionActual.explicacion;
-
-    actualizarMarcador();
-    guardarProgreso(); // Solo guarda si hay cuenta en la nube
-}
-
-function actualizarMarcador() {
-    const precisionCalculada = usuarioState.totalJugadas > 0 
-        ? Math.round((usuarioState.aciertos / usuarioState.totalJugadas) * 100) 
-        : 0;
-
-    statPuntos.textContent = usuarioState.puntos;
-    statPrecision.textContent = `${precisionCalculada}%`;
-    statRacha.textContent = usuarioState.racha;
-}
-
-// ==========================================
-// 5. EVENTOS E INICIALIZACIÓN
-// ==========================================
-botonNuevaSituacion.addEventListener('click', cargarNuevaSituacion);
-
-botonesOpcion.forEach(boton => {
-    boton.addEventListener('click', evaluarDecision);
-});
-
-// Arranca por defecto a 0 si no hay sesión iniciada
-actualizarMarcador();
-cargarNuevaSituacion();
-
-// ==========================================
-// 6. GESTIÓN DE MODAL Y SESIÓN (FIREBASE)
-// ==========================================
-document.addEventListener("DOMContentLoaded", () => {
-  const modalAuth = document.getElementById("auth-modal");
-  const btnAbrirAuth = document.getElementById("btn-abrir-auth");
-  const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
-
-  if (btnAbrirAuth && modalAuth) {
-    btnAbrirAuth.addEventListener("click", () => {
-      modalAuth.style.display = "flex";
-    });
-  }
-
-  if (btnCerrarAuth && modalAuth) {
-    btnCerrarAuth.addEventListener("click", () => {
-      modalAuth.style.display = "none";
-    });
-  }
-
-  window.addEventListener("click", (e) => {
-    if (modalAuth && e.target === modalAuth) {
-      modalAuth.style.display = "none";
-    }
-  });
-
-  setTimeout(() => {
-    const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } = window.refSimFirebase || {};
-    
-    if (!auth) return;
-
-    const emailInput = document.getElementById("user-email");
-    const passwordInput = document.getElementById("user-password");
-    const statusText = document.getElementById("auth-status");
-    const btnLogin = document.getElementById("btn-login");
-    const btnRegister = document.getElementById("btn-register");
-    const contenedorBotonAuth = btnAbrirAuth ? btnAbrirAuth.parentElement : null;
-
-    onAuthStateChanged(auth, async (user) => {
-      // Buscamos un contenedor específico para la zona de autenticación
-      let authContainer = document.getElementById("auth-container-ui");
-      
-      // Si no existe en el HTML aún, lo creamos dinámicamente dentro de la cabecera
-      if (!authContainer && btnAbrirAuth) {
-        authContainer = document.createElement("div");
-        authContainer.id = "auth-container-ui";
-        authContainer.style.cssText = "display: flex; align-items: center; gap: 10px;";
-        btnAbrirAuth.parentNode.appendChild(authContainer);
-      }
-
-      if (user) {
-        usuarioFirebaseActual = user;
-        
-        // Ocultamos el botón original de acceso
-        if (btnAbrirAuth) btnAbrirAuth.style.display = "none";
-
-        // Descargamos sus puntos reales de la nube
-        await cargarProgresoNube(user.uid);
-
-        // Pintamos el nombre y el botón de cerrar sesión en su propio espacio sin tocar los puntos
-        if (authContainer) {
-          let nombreCorto = user.email.split('@')[0];
-          authContainer.innerHTML = `
-            <span style="color: var(--amarilla); font-weight: 700; font-size: 0.85rem;">👤 ${nombreCorto}</span>
-            <button id="btn-cerrar-sesion" style="background: #E63946; color: white; border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">Cerrar sesión</button>
-          `;
-
-          document.getElementById("btn-cerrar-sesion").addEventListener("click", async () => {
-            await signOut(auth);
-            location.reload();
-          });
-        }
-      } else {
-        usuarioFirebaseActual = null;
-        
-        // Si no hay sesión, mostramos el botón de acceso original y limpiamos el contenedor de usuario
-        if (btnAbrirAuth) btnAbrirAuth.style.display = "block";
-        if (authContainer) authContainer.innerHTML = "";
-
-        usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
-        actualizarMarcador();
-      }
-    });
-
-    if (btnLogin && btnRegister && emailInput && passwordInput && statusText) {
-      btnLogin.addEventListener("click", async () => {
-        try {
-          await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-          statusText.style.color = "#2E9B5E";
-          statusText.innerText = "¡Inicio de sesión exitoso!";
-          setTimeout(() => { 
-            if (modalAuth) modalAuth.style.display = "none"; 
-          }, 1000);
-        } catch (error) {
-          statusText.style.color = "#E63946";
-          statusText.innerText = "Error: " + error.message;
-        }
-      });
-
-      btnRegister.addEventListener("click", async () => {
-        try {
-          await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-          statusText.style.color = "#2E9B5E";
-          statusText.innerText = "¡Cuenta creada con éxito!";
-          setTimeout(() => { 
-            if (modalAuth) modalAuth.style.display = "none"; 
-          }, 1000);
-        } catch (error) {
-          statusText.style.color = "#E63946";
-          statusText.innerText = "Error: " + error.message;
-        }
-      });
-    }
-  }, 1000);
-});
-// ==========================================
-// 7. MULTIDIOMA (Castellano / Euskera)
+// 2. DICCIONARIO MULTIDIOMA DE LA INTERFAZ
 // ==========================================
 const traducciones = {
     es: {
@@ -394,7 +86,10 @@ const traducciones = {
         btnFalta: "Falta",
         btnAmarilla: "Falta + Amarilla",
         btnRoja: "Falta + Roja",
-        btnSiguiente: "Siguiente jugada"
+        btnSiguiente: "Siguiente jugada",
+        decisionOficial: "Decisión oficial:",
+        aciertoMsg: "¡DECISIÓN CORRECTA! 👏",
+        falloMsg: "INCORRECTO ❌"
     },
     eu: {
         tagSimulador: "Epaile simulatzailea · IFAB Joko Arauak",
@@ -407,13 +102,18 @@ const traducciones = {
         btnFalta: "Falta",
         btnAmarilla: "Falta + Txartel horia",
         btnRoja: "Falta + Txartel gorria",
-        btnSiguiente: "Hurrengo jokaldia"
+        btnSiguiente: "Hurrengo jokaldia",
+        decisionOficial: "Erabaki ofiziala:",
+        aciertoMsg: "ERABAKI ZUZENA! 👏",
+        falloMsg: "OKERRA ❌"
     }
 };
 
-let idiomaActual = "es";
-
+// ==========================================
+// 3. INICIALIZACIÓN Y EVENTOS
+// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
+    // Selector de idioma mediante clics en las banderas
     const contenedorBanderas = document.getElementById("selector-idioma");
     if (contenedorBanderas) {
         contenedorBanderas.addEventListener("click", (e) => {
@@ -421,12 +121,123 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!boton) return;
             
             idiomaActual = boton.getAttribute("data-lang");
-            aplicarTraducciones();
+            aplicarTraduccionesFijas();
+            if (situacionActual) {
+                mostrarSituacionActualEnInterfaz();
+            }
         });
     }
+
+    // Cargar la primera jugada al iniciar
+    cargarNuevaSituacion();
+    
+    // Botón siguiente jugada
+    const btnSiguiente = document.getElementById("btn-nueva-situacion");
+    if (btnSiguiente) {
+        btnSiguiente.addEventListener("click", cargarNuevaSituacion);
+    }
+
+    // Configurar botones de opciones de arbitraje
+    const botonesOpcion = document.querySelectorAll(".btn-opcion");
+    botonesOpcion.forEach(btn => {
+        btn.addEventListener("click", () => {
+            evaluarDecision(btn.getAttribute("data-decision"));
+        });
+    });
 });
 
-function aplicarTraducciones() {
+function cargarNuevaSituacion() {
+    const indiceAleatorio = Math.floor(Math.random() * situacionesDB.length);
+    situacionActual = situacionesDB[indiceAleatorio];
+    mostrarSituacionActualEnInterfaz();
+}
+
+function mostrarSituacionActualEnInterfaz() {
+    if (!situacionActual) return;
+
+    // Seleccionar texto según el idioma actual (con respaldo en castellano)
+    const titulo = (idiomaActual === 'eu' && situacionActual.tipoEu) ? situacionActual.tipoEu : situacionActual.tipo;
+    const desc = (idiomaActual === 'eu' && situacionActual.descripcionEu) ? situacionActual.descripcionEu : situacionActual.descripcion;
+
+    const elementoTitulo = document.getElementById("situacion-titulo");
+    const elementoDesc = document.getElementById("situacion-descripcion");
+    
+    if (elementoTitulo) elementoTitulo.textContent = titulo;
+    if (elementoDesc) elementoDesc.textContent = desc;
+
+    // Posicionar el marcador en el campo mini
+    const marcador = document.getElementById("marcador-jugada");
+    if (marcador) {
+        marcador.style.left = `${situacionActual.posX}px`;
+        marcador.style.top = `${situacionActual.posY}px`;
+    }
+
+    // Ocultar panel de explicación anterior y habilitar botones
+    const panelExplicacion = document.getElementById("panel-explicacion");
+    if (panelExplicacion) panelExplicacion.style.display = "none";
+
+    activarBotonesOpcion(true);
+}
+
+function evaluarDecision(decisionUsuario) {
+    if (!situacionActual) return;
+
+    jugadasTotales++;
+    const esAcertado = decisionUsuario === situacionActual.decisionCorrecta;
+
+    const t = traducciones[idiomaActual];
+    const panelExplicacion = document.getElementById("panel-explicacion");
+    const resultadoTexto = document.getElementById("resultado-texto");
+    const explicacionTexto = document.getElementById("explicacion-texto");
+
+    if (esAcertado) {
+        puntos += 100;
+        aciertosTotales++;
+        rachaActual++;
+        if (resultadoTexto) {
+            resultadoTexto.textContent = t.aciertoMsg;
+            resultadoTexto.style.color = "#2ecc71";
+        }
+    } else {
+        rachaActual = 0;
+        if (resultadoTexto) {
+            resultadoTexto.textContent = t.falloMsg;
+            resultadoTexto.style.color = "#e74c3c";
+        }
+    }
+
+    const explicacionFinal = (idiomaActual === 'eu' && situacionActual.explicacionEu) ? situacionActual.explicacionEu : situacionActual.explicacion;
+    if (explicacionTexto) {
+        explicacionTexto.innerHTML = `<strong>${t.decisionOficial}</strong> ${situacionActual.decisionCorrecta}<br><br>${explicacionFinal}`;
+    }
+
+    if (panelExplicacion) panelExplicacion.style.display = "block";
+    
+    actualizarEstadisticasInterfaz();
+    activarBotonesOpcion(false);
+}
+
+function actualizarEstadisticasInterfaz() {
+    const elPuntos = document.getElementById("stat-puntos");
+    const elPrecision = document.getElementById("stat-precision");
+    const elRacha = document.getElementById("stat-racha");
+
+    if (elPuntos) elPuntos.textContent = puntos;
+    
+    const precision = jugadasTotales > 0 ? Math.round((aciertosTotales / jugadasTotales) * 100) : 0;
+    if (elPrecision) elPrecision.textContent = `${precision}%`;
+    
+    if (elRacha) elRacha.textContent = rachaActual;
+}
+
+function activarBotonesOpcion(activar) {
+    const botones = document.querySelectorAll(".btn-opcion");
+    botones.forEach(btn => {
+        btn.disabled = !activar;
+    });
+}
+
+function aplicarTraduccionesFijas() {
     const t = traducciones[idiomaActual];
     
     const tag = document.querySelector('.scorebug__tag');
@@ -440,7 +251,7 @@ function aplicarTraducciones() {
     if (lblR) lblR.textContent = t.lblRacha;
 
     const btnAcceso = document.getElementById('btn-abrir-auth');
-    if (btnAcceso && !usuarioFirebaseActual) btnAcceso.textContent = t.btnAcceso;
+    if (btnAcceso && !window.usuarioFirebaseActual) btnAcceso.textContent = t.btnAcceso;
 
     const varText = document.querySelector('.monitor__bar span:last-child');
     if (varText) varText.textContent = t.varRepeticion;
