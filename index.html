@@ -3,68 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RefSim - Simulador Arbitral</title>
+    <title>RefSim - Simulador Arbitral IFAB</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <h1>RefSim</h1>
-        <p>Simulador de situaciones arbitrales y toma de decisiones</p>
+        <h1>⚽ RefSim - Simulador Arbitral</h1>
+        <p>Pon a prueba tus decisiones según las reglas de la IFAB</p>
     </header>
 
-    <main>
-        <!-- Marcador de Gamificación -->
-        <div id="marcador-container">
+    <main class="contenedor-principal">
+        
+        <!-- Panel de Estadísticas / Récord -->
+        <section class="panel-stats">
             <div class="stat-box">
-                <span class="stat-label">Puntos</span>
+                <span class="stat-titulo">Puntos</span>
                 <span id="stat-puntos" class="stat-valor">0</span>
             </div>
             <div class="stat-box">
-                <span class="stat-label">Precisión</span>
+                <span class="stat-titulo">Precisión</span>
                 <span id="stat-precision" class="stat-valor">0%</span>
             </div>
             <div class="stat-box">
-                <span class="stat-label">Racha</span>
+                <span class="stat-titulo">Racha</span>
                 <span id="stat-racha" class="stat-valor">🔥 0</span>
             </div>
-        </div>
+        </section>
 
-        <!-- Panel de la situación -->
-        <div id="panel-situacion">
-            <h2 id="situacion-titulo">Carga una situación para empezar</h2>
-            <p id="situacion-descripcion">Haz clic en "Nueva situación" para generar un lance de juego.</p>
-        </div>
-
-        <!-- Campo de fútbol -->
-        <div id="campo-container">
-            <div id="campo">
-                <div class="linea-central"></div>
+        <!-- Campo de Fútbol Interactivo -->
+        <section class="contenedor-campo">
+            <div id="campo" class="campo-futbol">
+                <div class="linea area-grande-izq"></div>
+                <div class="linea area-chica-izq"></div>
+                <div class="linea centro-campo"></div>
                 <div class="circulo-central"></div>
-                <div class="area area-superior"></div>
-                <div class="area area-inferior"></div>
+                <div class="linea area-grande-der"></div>
+                <div class="linea area-chica-der"></div>
             </div>
-        </div>
+        </section>
 
-        <!-- Opciones de decisión del árbitro -->
-        <div id="panel-decisiones">
-            <h3>¿Cuál es tu decisión?</h3>
-            <div class="botones-decision">
-                <button class="btn-opcion" data-decision="No hay falta">⚪ No hay falta</button>
-                <button class="btn-opcion" data-decision="Falta">🔵 Falta</button>
-                <button class="btn-opcion" data-decision="Falta + Tarjeta Amarilla">🟨 Falta + Amarilla</button>
-                <button class="btn-opcion" data-decision="Falta + Tarjeta Roja">🟥 Falta + Roja</button>
+        <!-- Panel de Situación y Decisiones -->
+        <section class="panel-decisiones">
+            <h2 id="situacion-titulo">Cargando situación...</h2>
+            <p id="situacion-descripcion">Espere un momento...</p>
+
+            <div class="botones-opciones">
+                <button class="btn-opcion" data-decision="No hay falta">No hay falta</button>
+                <button class="btn-opcion" data-decision="Falta">Falta</button>
+                <button class="btn-opcion" data-decision="Falta + Tarjeta Amarilla">Falta + Amarilla</button>
+                <button class="btn-opcion" data-decision="Falta + Tarjeta Roja">Falta + Roja</button>
             </div>
-        </div>
 
-        <!-- Panel de resultado y explicación IFAB -->
-        <div id="panel-feedback" class="oculto">
-            <h3 id="feedback-resultado"></h3>
-            <p id="feedback-explicacion"></p>
-        </div>
+            <!-- Feedback tras la respuesta -->
+            <div id="panel-feedback" class="feedback-box oculto">
+                <h3 id="feedback-resultado"></h3>
+                <p id="feedback-explicacion"></p>
+                <button id="btn-nueva-situacion" class="btn-siguiente">Siguiente Jugada ➡️</button>
+            </div>
+        </section>
 
-        <button id="btn-nueva-situacion">🎲 Nueva situación</button>
     </main>
+
+    <!-- PIE DE PÁGINA (Requisito Obligatorio Google AdSense) -->
+    <footer class="footer-legal">
+        <div class="footer-contenido">
+            <p>&copy; 2026 RefSim - Basado en las Reglas del Juego de la IFAB.</p>
+            <nav class="footer-links">
+                <a href="#privacidad" onclick="alert('Política de Privacidad: RefSim utiliza almacenamiento local para guardar tu progreso de juego. No recopilamos datos personales sin tu consentimiento.')">Política de Privacidad</a> | 
+                <a href="#contacto" onclick="alert('Contacto: Para consultas o sugerencias escribe a soporte@refsim.com')">Contacto</a>
+            </nav>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>
