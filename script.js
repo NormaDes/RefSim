@@ -114,6 +114,7 @@ let situacionActual = null;
 const campo = document.getElementById('campo');
 const botonNuevaSituacion = document.getElementById('btn-nueva-situacion');
 
+const idSituacion = document.getElementById('situacion-id');
 const tituloSituacion = document.getElementById('situacion-titulo');
 const descripcionSituacion = document.getElementById('situacion-descripcion');
 
@@ -149,7 +150,8 @@ function cargarNuevaSituacion() {
     const indiceAleatorio = Math.floor(Math.random() * situacionesDB.length);
     situacionActual = situacionesDB[indiceAleatorio];
 
-    tituloSituacion.textContent = `Situación #${situacionActual.id}: ${situacionActual.tipo}`;
+    idSituacion.textContent = `Jugada #${situacionActual.id}`;
+    tituloSituacion.textContent = situacionActual.tipo;
     descripcionSituacion.textContent = situacionActual.descripcion;
 
     colocarMarcador(situacionActual.posX, situacionActual.posY);
@@ -204,7 +206,7 @@ function actualizarMarcador() {
 
     statPuntos.textContent = usuarioState.puntos;
     statPrecision.textContent = `${precisionCalculada}%`;
-    statRacha.textContent = `🔥 ${usuarioState.racha}`;
+    statRacha.textContent = usuarioState.racha;
 }
 
 // ==========================================

@@ -1,83 +1,153 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RefSim - Simulador Arbitral IFAB</title>
-    <link rel="stylesheet" href="style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6712707302498032"
-     crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RefSim — Simulador Arbitral IFAB</title>
+<meta name="description" content="Pon a prueba tus decisiones arbitrales según el reglamento IFAB en jugadas reales de fútbol.">
+<meta name="theme-color" content="#0A1512">
+<link rel="canonical" href="https://tudominio.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RefSim — Simulador Arbitral IFAB">
+<meta property="og:description" content="Pon a prueba tus decisiones arbitrales según el reglamento IFAB en jugadas reales de fútbol.">
+<meta property="og:locale" content="es_ES">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Ccircle cx='17' cy='17' r='16' fill='%230A1512'/%3E%3Ccircle cx='17' cy='17' r='15.5' stroke='%23F5C518' stroke-width='1.6' fill='none'/%3E%3Cpath d='M17 8 L21 14 L28 15 L23 20 L24.5 27 L17 23.5 L9.5 27 L11 20 L6 15 L13 14 Z' fill='%23F5C518'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6712707302498032"
+ crossorigin="anonymous"></script>
 </head>
 <body>
 
-    <header>
-        <h1>⚽ RefSim - Simulador Arbitral</h1>
-        <p>Pon a prueba tus decisiones según las reglas de la IFAB</p>
+<div class="broadcast">
+
+    <!-- BARRA MARCADOR -->
+    <header class="scorebug">
+        <div class="scorebug__brand">
+            <svg class="scorebug__mark" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="17" cy="17" r="15.5" stroke="#F5C518" stroke-width="2"/>
+                <path d="M17 8 L21 14 L28 15 L23 20 L24.5 27 L17 23.5 L9.5 27 L11 20 L6 15 L13 14 Z" fill="#F5C518"/>
+            </svg>
+            <div>
+                <h1>RefSim</h1>
+                <p class="scorebug__tag">Simulador arbitral · Reglas del Juego IFAB</p>
+            </div>
+        </div>
+        <dl class="scorebug__stats">
+            <div class="stat">
+                <dt>Puntos</dt>
+                <dd id="stat-puntos">0</dd>
+            </div>
+            <div class="stat">
+                <dt>Precisión</dt>
+                <dd id="stat-precision">0%</dd>
+            </div>
+            <div class="stat">
+                <dt>Racha</dt>
+                <dd id="stat-racha">0</dd>
+            </div>
+        </dl>
     </header>
 
-    <main class="contenedor-principal">
-        
-        <!-- Panel de Estadísticas / Récord -->
-        <section class="panel-stats">
-            <div class="stat-box">
-                <span class="stat-titulo">Puntos</span>
-                <span id="stat-puntos" class="stat-valor">0</span>
+    <!-- ESPACIO PUBLICITARIO: BANNER SUPERIOR -->
+    <div class="ad-slot ad-slot--banner">
+        <span class="ad-slot__label">Publicidad</span>
+        <div class="ad-slot__unit">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-6712707302498032"
+                 data-ad-slot="0000000000"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+    </div>
+
+    <!-- SALA DE REVISIÓN -->
+    <main class="review">
+
+        <section class="monitor" aria-label="Repetición de la jugada">
+            <div class="monitor__bar">
+                <span class="monitor__dot" aria-hidden="true"></span>
+                <span>VAR · Repetición de la jugada</span>
             </div>
-            <div class="stat-box">
-                <span class="stat-titulo">Precisión</span>
-                <span id="stat-precision" class="stat-valor">0%</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-titulo">Racha</span>
-                <span id="stat-racha" class="stat-valor">🔥 0</span>
+            <div id="campo" class="pitch">
+                <div class="pitch__line pitch__area-izq"></div>
+                <div class="pitch__line pitch__area-chica-izq"></div>
+                <div class="pitch__line pitch__centro"></div>
+                <div class="pitch__circulo"></div>
+                <div class="pitch__line pitch__area-der"></div>
+                <div class="pitch__line pitch__area-chica-der"></div>
             </div>
         </section>
 
-        <!-- Campo de Fútbol Interactivo -->
-        <section class="contenedor-campo">
-            <div id="campo" class="campo-futbol">
-                <div class="linea area-grande-izq"></div>
-                <div class="linea area-chica-izq"></div>
-                <div class="linea centro-campo"></div>
-                <div class="circulo-central"></div>
-                <div class="linea area-grande-der"></div>
-                <div class="linea area-chica-der"></div>
-            </div>
-        </section>
-
-        <!-- Panel de Situación y Decisiones -->
-        <section class="panel-decisiones">
-            <h2 id="situacion-titulo">Cargando situación...</h2>
-            <p id="situacion-descripcion">Espere un momento...</p>
-
-            <div class="botones-opciones">
-                <button class="btn-opcion" data-decision="No hay falta">No hay falta</button>
-                <button class="btn-opcion" data-decision="Falta">Falta</button>
-                <button class="btn-opcion" data-decision="Falta + Tarjeta Amarilla">Falta + Amarilla</button>
-                <button class="btn-opcion" data-decision="Falta + Tarjeta Roja">Falta + Roja</button>
+        <section class="panel">
+            <div class="situation">
+                <span id="situacion-id" class="situation__id">Jugada</span>
+                <h2 id="situacion-titulo">Cargando situación…</h2>
+                <p id="situacion-descripcion">Un momento, el árbitro revisa la jugada…</p>
             </div>
 
-            <!-- Feedback tras la respuesta -->
-            <div id="panel-feedback" class="feedback-box oculto">
+            <div class="decisions" role="group" aria-label="Elige tu decisión arbitral">
+                <button class="decision decision--clean" data-decision="No hay falta">
+                    <span class="decision__glyph" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12.5L10 17.5L19 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    No hay falta
+                </button>
+                <button class="decision decision--foul" data-decision="Falta">
+                    <span class="decision__glyph" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.2"/><path d="M12 7v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.3" r="1.15" fill="currentColor"/></svg>
+                    </span>
+                    Falta
+                </button>
+                <button class="decision decision--yellow" data-decision="Falta + Tarjeta Amarilla">
+                    <span class="decision__card" aria-hidden="true"></span>
+                    Falta + Amarilla
+                </button>
+                <button class="decision decision--red" data-decision="Falta + Tarjeta Roja">
+                    <span class="decision__card" aria-hidden="true"></span>
+                    Falta + Roja
+                </button>
+            </div>
+
+            <div id="panel-feedback" class="feedback oculto" aria-live="polite">
                 <h3 id="feedback-resultado"></h3>
                 <p id="feedback-explicacion"></p>
-                <button id="btn-nueva-situacion" class="btn-siguiente">Siguiente Jugada ➡️</button>
+                <button id="btn-nueva-situacion" class="btn-siguiente">Siguiente jugada</button>
             </div>
         </section>
 
     </main>
 
-    <!-- PIE DE PÁGINA (Requisito Obligatorio Google AdSense) -->
-    <footer class="footer-legal">
-        <div class="footer-contenido">
-            <p>&copy; 2026 RefSim - Basado en las Reglas del Juego de la IFAB.</p>
-            <nav class="footer-links">
-                <a href="#privacidad" onclick="alert('Política de Privacidad: RefSim utiliza almacenamiento local para guardar tu progreso de juego. No recopilamos datos personales sin tu consentimiento.')">Política de Privacidad</a> | 
-                <a href="#contacto" onclick="alert('Contacto: Para consultas o sugerencias escribe a soporte@refsim.com')">Contacto</a>
-            </nav>
+    <!-- ESPACIO PUBLICITARIO: RECTÁNGULO INFERIOR -->
+    <div class="ad-slot ad-slot--rectangle">
+        <span class="ad-slot__label">Publicidad</span>
+        <div class="ad-slot__unit">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-6712707302498032"
+                 data-ad-slot="0000000000"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="footer-legal">
+        <p>&copy; 2026 RefSim — Basado en las Reglas del Juego de la IFAB.</p>
+        <nav class="footer-links">
+            <a href="#privacidad" onclick="alert('Política de Privacidad: RefSim utiliza almacenamiento local para guardar tu progreso de juego. No recopilamos datos personales sin tu consentimiento.')">Política de Privacidad</a>
+            <span aria-hidden="true">·</span>
+            <a href="#contacto" onclick="alert('Contacto: Para consultas o sugerencias escribe a soporte@refsim.com')">Contacto</a>
+        </nav>
     </footer>
 
-    <script src="script.js"></script>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
