@@ -7,19 +7,28 @@ let marcadorActual = null;
 let usuarioFirebaseActual = null;
 let usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
 
+// Variables para el control de Modos (Práctica vs Examen Oficial)
+let tipoModoJuego = "practica"; // "practica" o "examen"
+let indicesDisponibles = []; 
+
+// Variables específicas del Modo Examen
+let preguntasExamen = [];
+let indiceExamenActual = 0;
+let historialExamenActual = [];
+let tiempoExamenSegundos = 0;
+let timerInterval = null;
+
 // Lienzo de referencia de las coordenadas posX / posY de la base de datos.
-// El campo es fluido: convertimos esos px a % para que el marcador caiga
-// siempre en el mismo sitio en cualquier pantalla.
 const CAMPO_REF = { ancho: 760, alto: 450 };
 
 const traducciones = {
     es: {
-        tagSimulador: "Simulador arbitral \u00b7 Reglas del Juego IFAB",
+        tagSimulador: "Simulador arbitral · Reglas del Juego IFAB",
         lblPuntos: "Puntos",
-        lblPrecision: "Precisi\u00f3n",
+        lblPrecision: "Precisión",
         lblRacha: "Racha",
         btnAcceso: "Acceso",
-        varRepeticion: "VAR \u00b7 Repetici\u00f3n de la jugada",
+        varRepeticion: "VAR · Repetición de la jugada",
         jugada: "Jugada",
 
         btnNoFalta: "No hay falta",
@@ -32,23 +41,23 @@ const traducciones = {
         btnFueraDeJuego: "Fuera de juego",
         btnSiguiente: "Siguiente jugada",
 
-        aciertoMsg: "Decisi\u00f3n correcta",
-        falloMsg: "Decisi\u00f3n incorrecta",
-        decisionOficial: "Decisi\u00f3n oficial:",
+        aciertoMsg: "Decisión correcta",
+        falloMsg: "Decisión incorrecta",
+        decisionOficial: "Decisión oficial:",
 
         authTitulo: "Acceso a RefSim",
         authIntro: "Entra para guardar tus puntos y tu racha en cualquier dispositivo.",
-        authEmail: "Correo electr\u00f3nico",
-        authPassword: "Contrase\u00f1a",
-        authLogin: "Iniciar sesi\u00f3n",
+        authEmail: "Correo electrónico",
+        authPassword: "Contraseña",
+        authLogin: "Iniciar sesión",
         authRegister: "Crear cuenta",
-        authCerrarSesion: "Cerrar sesi\u00f3n",
-        authOk: "Sesi\u00f3n iniciada",
+        authCerrarSesion: "Cerrar sesión",
+        authOk: "Sesión iniciada",
         authCreada: "Cuenta creada",
         authError: "No se ha podido completar:",
 
         adLabel: "Publicidad",
-        footer: "\u00a9 2026 RefSim \u2014 Basado en las Reglas del Juego de la IFAB.",
+        footer: "© 2026 RefSim — Basado en las Reglas del Juego de la IFAB.",
 
         nombreDecision: {
             "No hay falta": "No hay falta",
@@ -59,16 +68,56 @@ const traducciones = {
             "Penalti + Tarjeta Amarilla": "Penalti + tarjeta amarilla",
             "Gol": "Gol",
             "Fuera de juego": "Fuera de juego"
-        }
+        },
+
+        btnNoFaltaDesc: "El contacto es legal, no es motivo de sanción.",
+        btnFaltaDesc: "Infracción sancionable con tiro libre directo.",
+        btnAmarillaDesc: "Es una falta imprudente o táctica.",
+        btnRojaDesc: "Juego brusco grave o fuerza excesiva.",
+        btnPenaltiDesc: "Infracción dentro del área que impide el juego.",
+        btnPenaltiAmarillaDesc: "Infracción imprudente cometida en el área.",
+        btnGolDesc: "El balón cruzó la línea de meta reglamentariamente.",
+        btnFueraDeJuegoDesc: "Posición antirreglamentaria al recibir el balón.",
+
+        navInicio: "Inicio",
+        navPractica: "Práctica",
+        navExamen: "Examen",
+        navEstadisticas: "Estadísticas",
+        navAjustes: "Ajustes",
+
+        modoPracticaTitulo: "Práctica",
+        modoPracticaDesc: "Entrena a tu ritmo",
+        modoExamenTitulo: "Examen Oficial (25)",
+        modoExamenDesc: "Simula el examen real",
+        modoPartidosTitulo: "Mis Partidos",
+        modoPartidosDesc: "Tus estadísticas y progreso",
+
+        metaMinuto: "Minuto",
+        metaZona: "Zona de la jugada",
+        metaContexto: "Contexto",
+
+        zonaDefensiva: "Zona defensiva",
+        zonaMedio: "Medio campo",
+        zonaOfensiva: "Zona ofensiva",
+        zonaArea: "Área de penalti",
+
+        ctxOffside: "Ataque en posición adelantada",
+        ctxArea: "Disputa dentro del área",
+        ctxGol: "Finalización a portería",
+        ctxDisputa: "Disputa del balón",
+
+        tickerMsg: "Sigue entrenando. Cada decisión cuenta.",
+        ajustesTitulo: "Ajustes",
+        ajustesIntro: "Más opciones de personalización, próximamente."
     },
 
     eu: {
-        tagSimulador: "Arbitraje simulagailua \u00b7 IFAB Jokoaren Arauak",
+        tagSimulador: "Arbitraje simulagailua · IFAB Jokoaren Arauak",
         lblPuntos: "Puntuak",
         lblPrecision: "Zehaztasuna",
         lblRacha: "Bolada",
         btnAcceso: "Sartu",
-        varRepeticion: "VAR \u00b7 Jokaldiaren errepikapena",
+        varRepeticion: "VAR · Jokaldiaren errepikapena",
         jugada: "Jokaldia",
 
         btnNoFalta: "Ez dago faltarik",
@@ -97,7 +146,7 @@ const traducciones = {
         authError: "Ezin izan da osatu:",
 
         adLabel: "Publizitatea",
-        footer: "\u00a9 2026 RefSim \u2014 IFABen Jokoaren Arauetan oinarritua.",
+        footer: "© 2026 RefSim — IFABen Jokoaren Arauetan oinarritua.",
 
         nombreDecision: {
             "No hay falta": "Ez dago faltarik",
@@ -108,7 +157,47 @@ const traducciones = {
             "Penalti + Tarjeta Amarilla": "Penaltia + txartel horia",
             "Gol": "Gola",
             "Fuera de juego": "Jokoz kanpo"
-        }
+        },
+
+        btnNoFaltaDesc: "Ukipena legezkoa da, ez du zigorrik behar.",
+        btnFaltaDesc: "Jaurtiketa libre zuzenarekin zigortu beharreko arau-haustea.",
+        btnAmarillaDesc: "Falta inprudentea edo taktikoa da.",
+        btnRojaDesc: "Joko zakar larria edo gehiegizko indarra.",
+        btnPenaltiDesc: "Árean jokoa eragozten duen arau-haustea.",
+        btnPenaltiAmarillaDesc: "Árean egindako falta inprudentea.",
+        btnGolDesc: "Baloiak ate-lerroa arauz gaindu du.",
+        btnFueraDeJuegoDesc: "Baloia jaso duenean posizio ilegalean zegoen.",
+
+        navInicio: "Hasiera",
+        navPractica: "Praktika",
+        navExamen: "Azterketa",
+        navEstadisticas: "Estatistikak",
+        navAjustes: "Ezarpenak",
+
+        modoPracticaTitulo: "Praktika",
+        modoPracticaDesc: "Trebatu zure erritmoan",
+        modoExamenTitulo: "Azterketa Ofiziala (25)",
+        modoExamenDesc: "Benetako azterketa simulatu",
+        modoPartidosTitulo: "Nire Partidak",
+        modoPartidosDesc: "Zure estatistikak eta aurrerapena",
+
+        metaMinuto: "Minutua",
+        metaZona: "Jokaldiaren eremua",
+        metaContexto: "Testuingurua",
+
+        zonaDefensiva: "Defentsa eremua",
+        zonaMedio: "Erdi zelaia",
+        zonaOfensiva: "Eraso eremua",
+        zonaArea: "Penalti eremua",
+
+        ctxOffside: "Eraso jokoz kanpoko posizioan",
+        ctxArea: "Eremuko lehia",
+        ctxGol: "Ate aurreko amaiera",
+        ctxDisputa: "Baloiaren lehia",
+
+        tickerMsg: "Jarraitu trebatzen. Erabaki bakoitzak balio du.",
+        ajustesTitulo: "Ezarpenak",
+        ajustesIntro: "Pertsonalizazio aukera gehiago, laster."
     }
 };
 
@@ -117,10 +206,8 @@ function t() {
 }
 
 // ==========================================
-// 1. BASE DE DATOS DE SITUACIONES (IFAB - Bilingüe)
+// 1. BASE DE DATOS DE SITUACIONES (IFAB - 50 Jugadas)
 // ==========================================
-let indicesDisponibles = []; // 📌 Lista para el sistema aleatorio sin repetición
-
 const situacionesDB = [
     {
         id: 1,
@@ -607,7 +694,7 @@ const situacionesDB = [
         tipo: "Portero recoge pase deliberado con pie",
         tipoEu: "Atezainak oinez emandako nahitaezko pasea hartzen du",
         descripcion: "Un defensor juega deliberadamente el balón con el pie hacia su guardameta y este lo recoge con las manos.",
-        descripcionEu: "Defentsa batek nahita oinez pasatzen dio baloia bere atezainari eta honek eskuekin hartzen du.",
+        descripcionEu: "Defentsa batek nahita oinez pasatzen dio bere atezainari eta honek eskuekin hartzen du.",
         posX: 670,
         posY: 350,
         decisionCorrecta: "Falta",
@@ -725,7 +812,7 @@ const situacionesDB = [
 ];
 
 // ==========================================
-// 3. LÓGICA DEL JUEGO
+// 2. LÓGICA DE SELECCIÓN DE JUGADA
 // ==========================================
 function cargarNuevaSituacion() {
     if (marcadorActual) {
@@ -745,28 +832,35 @@ function cargarNuevaSituacion() {
         btn.classList.remove('es-correcta', 'es-elegida-fallo');
     });
 
-    if (situacionesDB.length === 0) return;
-
-    // Si la lista de índices está vacía, rellenamos y barajamos los 50 elementos
-    if (indicesDisponibles.length === 0) {
-        indicesDisponibles = Array.from({ length: situacionesDB.length }, (_, i) => i);
-        // Algoritmo Fisher-Yates para mezcla aleatoria
-        for (let i = indicesDisponibles.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [indicesDisponibles[i], indicesDisponibles[j]] = [indicesDisponibles[j], indicesDisponibles[i]];
+    if (tipoModoJuego === "examen") {
+        // --- MODO EXAMEN OFICIAL ---
+        if (indiceExamenActual >= preguntasExamen.length) {
+            finalizarExamenOficial();
+            return;
         }
+        situacionActual = preguntasExamen[indiceExamenActual];
+    } else {
+        // --- MODO PRÁCTICA LIBRE ---
+        if (indicesDisponibles.length === 0) {
+            indicesDisponibles = Array.from({ length: situacionesDB.length }, (_, i) => i);
+            for (let i = indicesDisponibles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indicesDisponibles[i], indicesDisponibles[j]] = [indicesDisponibles[j], indicesDisponibles[i]];
+            }
+        }
+        const indiceAleatorio = indicesDisponibles.pop();
+        situacionActual = situacionesDB[indiceAleatorio];
     }
 
-    // Extraemos la siguiente jugada aleatoria sin repetir de la lista
-    const indiceAleatorio = indicesDisponibles.pop();
-    situacionActual = situacionesDB[indiceAleatorio];
-
     const idSituacion = document.getElementById('situacion-id');
+    const idSituacionPanel = document.getElementById('situacion-id-panel');
     const tituloSituacion = document.getElementById('situacion-titulo');
     const descripcionSituacion = document.getElementById('situacion-descripcion');
 
-    if (idSituacion) idSituacion.textContent = `${t().jugada} #${situacionActual.id}`;
-    
+    const prefixNum = tipoModoJuego === "examen" ? `Examen Oficial [${indiceExamenActual + 1}/${preguntasExamen.length}]` : `${t().jugada} #${situacionActual.id}`;
+    if (idSituacion) idSituacion.textContent = prefixNum;
+    if (idSituacionPanel) idSituacionPanel.textContent = prefixNum;
+
     if (tituloSituacion) {
         tituloSituacion.textContent = (idiomaActual === 'eu' && situacionActual.tipoEu) ? situacionActual.tipoEu : situacionActual.tipo;
     }
@@ -775,6 +869,49 @@ function cargarNuevaSituacion() {
     }
 
     colocarMarcador(situacionActual.posX, situacionActual.posY);
+    actualizarMetaJugada(situacionActual);
+}
+
+// ==========================================
+// 1b. INFORMACIÓN CONTEXTUAL DE LA JUGADA (minuto / zona / contexto)
+// ==========================================
+function calcularZonaJugada(x, y) {
+    const cercaPorteria = x < 90 || x > (CAMPO_REF.ancho - 90);
+    const cercaCentroVertical = y > CAMPO_REF.alto * 0.18 && y < CAMPO_REF.alto * 0.82;
+    if (cercaPorteria && cercaCentroVertical) return 'zonaArea';
+    if (x < CAMPO_REF.ancho * 0.38) return 'zonaDefensiva';
+    if (x > CAMPO_REF.ancho * 0.62) return 'zonaOfensiva';
+    return 'zonaMedio';
+}
+
+function calcularContextoJugada(situacion) {
+    const decision = situacion.decisionCorrecta;
+    if (decision === 'Fuera de juego') return 'ctxOffside';
+    if (decision.includes('Penalti')) return 'ctxArea';
+    if (decision === 'Gol') return 'ctxGol';
+    return 'ctxDisputa';
+}
+
+function actualizarMetaJugada(situacion) {
+    const txt = t();
+    const elMinuto = document.getElementById('meta-minuto');
+    const elZona = document.getElementById('meta-zona');
+    const elContexto = document.getElementById('meta-contexto');
+
+    const minuto = ((situacion.id * 17) % 90) + 1;
+    if (elMinuto) elMinuto.textContent = `${minuto}'`;
+
+    const claveZona = calcularZonaJugada(situacion.posX, situacion.posY);
+    if (elZona) {
+        elZona.textContent = txt[claveZona];
+        elZona.dataset.clave = claveZona;
+    }
+
+    const claveContexto = calcularContextoJugada(situacion);
+    if (elContexto) {
+        elContexto.textContent = txt[claveContexto];
+        elContexto.dataset.clave = claveContexto;
+    }
 }
 
 function colocarMarcador(x, y) {
@@ -794,11 +931,25 @@ function evaluarDecision(event) {
     const decisionElegida = event.currentTarget.getAttribute('data-decision');
     const txt = t();
     const botonesOpcion = document.querySelectorAll('.btn-opcion');
-    
-    const panelFeedback = document.getElementById('panel-feedback');
-    const resultadoFeedback = document.getElementById('feedback-resultado');
-    const explicacionFeedback = document.getElementById('feedback-explicacion');
+    const esAcierto = (decisionElegida.trim() === situacionActual.decisionCorrecta.trim());
 
+    if (tipoModoJuego === "examen") {
+        // --- EN MODO EXAMEN: No mostramos feedback inmediato, guardamos y avanzamos ---
+        historialExamenActual.push({
+            id: situacionActual.id,
+            enunciado: (idiomaActual === 'eu' && situacionActual.tipoEu) ? situacionActual.tipoEu : situacionActual.tipo,
+            tuRespuesta: decisionElegida,
+            respuestaCorrecta: situacionActual.decisionCorrecta,
+            explicacion: (idiomaActual === 'eu' && situacionActual.explicacionEu) ? situacionActual.explicacionEu : situacionActual.explicacion,
+            acertado: esAcierto
+        });
+
+        indiceExamenActual++;
+        cargarNuevaSituacion();
+        return;
+    }
+
+    // --- EN MODO PRÁCTICA: Sí mostramos acierto/fallo y explicación inmediata ---
     botonesOpcion.forEach(btn => {
         btn.disabled = true;
         if (btn.getAttribute('data-decision') === situacionActual.decisionCorrecta) {
@@ -806,14 +957,17 @@ function evaluarDecision(event) {
         }
     });
     
+    const panelFeedback = document.getElementById('panel-feedback');
+    const resultadoFeedback = document.getElementById('feedback-resultado');
+    const explicacionFeedback = document.getElementById('feedback-explicacion');
+
     if (panelFeedback) {
-        panelFeedback.classList.remove('oculto');
-        panelFeedback.classList.remove('acierto', 'fallo');
+        panelFeedback.classList.remove('oculto', 'acierto', 'fallo');
     }
 
     usuarioState.totalJugadas++;
 
-    if (decisionElegida.trim() === situacionActual.decisionCorrecta.trim()) {
+    if (esAcierto) {
         usuarioState.aciertos++;
         usuarioState.racha++;
         if (usuarioState.racha > usuarioState.maxRacha) {
@@ -842,6 +996,273 @@ function evaluarDecision(event) {
     guardarProgresoNubeAuto();
 }
 
+// ==========================================
+// 3. CONTROL DE MODO EXAMEN Y CRONÓMETRO
+// ==========================================
+function iniciarModoExamenOficial() {
+    tipoModoJuego = "examen";
+    indiceExamenActual = 0;
+    historialExamenActual = [];
+    tiempoExamenSegundos = 0;
+
+    // Seleccionar 25 preguntas aleatorias del total de 50 sin repetir
+    preguntasExamen = [...situacionesDB].sort(() => Math.random() - 0.5).slice(0, 25);
+
+    // Ocultar paneles anteriores de resultados si los hubiera
+    const anterior = document.getElementById('panel-resultados-examen');
+    if (anterior) anterior.remove();
+
+    const panelDecisiones = document.querySelector('.decisions');
+    if (panelDecisiones) panelDecisiones.style.display = 'grid';
+
+    // Iniciar Cronómetro
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        tiempoExamenSegundos++;
+        actualizarRelojUI();
+    }, 1000);
+
+    crearBarraModoUI();
+    cargarNuevaSituacion();
+}
+
+function iniciarModoPractica() {
+    tipoModoJuego = "practica";
+    if (timerInterval) clearInterval(timerInterval);
+
+    const anterior = document.getElementById('panel-resultados-examen');
+    if (anterior) anterior.remove();
+
+    const panelDecisiones = document.querySelector('.decisions');
+    if (panelDecisiones) panelDecisiones.style.display = 'grid';
+
+    crearBarraModoUI();
+    cargarNuevaSituacion();
+}
+
+function actualizarRelojUI() {
+    const relojEl = document.getElementById('reloj-examen');
+    if (!relojEl) return;
+    const mins = Math.floor(tiempoExamenSegundos / 60).toString().padStart(2, '0');
+    const secs = (tiempoExamenSegundos % 60).toString().padStart(2, '0');
+    relojEl.textContent = `⏱️ ${mins}:${secs}`;
+}
+
+async function guardarExamenEnNube(aciertos, total, porcentaje, segundos, detalle) {
+    if (!usuarioFirebaseActual || !window.refSimFirebase) return;
+    const { db, doc, setDoc, getDoc } = window.refSimFirebase;
+    try {
+        const docRef = doc(db, "usuarios", usuarioFirebaseActual.uid);
+        const docSnap = await getDoc(docRef);
+        
+        let historialExistente = [];
+        if (docSnap.exists() && docSnap.data().historialExamenes) {
+            historialExistente = docSnap.data().historialExamenes;
+        }
+
+        const nuevoExamen = {
+            fecha: new Date().toISOString(),
+            aciertos: Number(aciertos),
+            total: Number(total),
+            porcentaje: Number(porcentaje),
+            tiempoSegundos: Number(segundos),
+            detalle: Array.isArray(detalle) ? detalle : []
+        };
+
+        historialExistente.push(nuevoExamen);
+
+        await setDoc(docRef, { 
+            historialExamenes: historialExistente 
+        }, { merge: true });
+
+        console.log("¡Examen guardado correctamente en la nube!");
+    } catch (e) {
+        console.error("Error al guardar historial en Firebase:", e);
+    }
+}
+
+function finalizarExamenOficial() {
+    if (timerInterval) clearInterval(timerInterval);
+    tipoModoJuego = "practica"; // Volvemos a estado libre
+
+    const total = historialExamenActual.length;
+    const aciertos = historialExamenActual.filter(h => h.acertado).length;
+    const porcentaje = total > 0 ? Math.round((aciertos / total) * 100) : 0;
+
+    const panelDecisiones = document.querySelector('.decisions');
+    if (panelDecisiones) panelDecisiones.style.display = 'none';
+
+    const panelSituacion = document.querySelector('.panel');
+    if (!panelSituacion) return;
+
+    // Guardar en Firestore el resultado del examen
+    guardarExamenEnNube(aciertos, total, porcentaje, tiempoExamenSegundos, historialExamenActual);
+
+    let mins = Math.floor(tiempoExamenSegundos / 60);
+    let secs = tiempoExamenSegundos % 60;
+
+    let htmlRevision = `
+        <div id="panel-resultados-examen" style="margin-top: 15px; padding: 20px; background: rgba(10, 21, 18, 0.95); border: 1px solid var(--amarilla); border-radius: var(--radio-m);">
+            <h2 style="font-family: var(--fuente-display); font-size: 1.6rem; color: var(--amarilla); margin-bottom: 6px;">📋 Acta Oficial de Examen</h2>
+            <p style="font-size: 1rem; margin-bottom: 4px;">Puntuación: <strong>${aciertos} / ${total}</strong> aciertos (<strong>${porcentaje}%</strong>)</p>
+            <p style="font-size: 0.85rem; color: var(--tenue); margin-bottom: 12px;">Tiempo empleado: ${mins}m ${secs}s</p>
+            
+            <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--amarilla-clara);">Revisión detallada de tus respuestas:</h3>
+            <div style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+    `;
+
+    historialExamenActual.forEach((item, index) => {
+        const colorBorde = item.acertado ? 'var(--verde-claro)' : 'var(--roja)';
+        const icono = item.acertado ? '✅' : '❌';
+        htmlRevision += `
+            <div style="padding: 9px; background: rgba(255,255,255,0.03); border-left: 4px solid ${colorBorde}; border-radius: 4px; font-size: 0.82rem;">
+                <p><strong>#${index + 1} - ${item.enunciado}</strong> ${icono}</p>
+                <p style="color: var(--tenue); font-size: 0.78rem;">Tu elección: <em>${item.tuRespuesta}</em> | Oficial IFAB: <strong>${item.respuestaCorrecta}</strong></p>
+                <p style="color: var(--tenue-oscuro); font-size: 0.75rem; margin-top: 3px;">📖 ${item.explicacion}</p>
+            </div>
+        `;
+    });
+
+    htmlRevision += `
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 14px;">
+                <button type="button" id="btn-repetir-examen" class="btn-siguiente" style="flex: 1;">Hacer Nuevo Examen</button>
+                <button type="button" id="btn-ver-historial" class="btn-auth btn-auth--secundario" style="flex: 1; padding: 11px;">Ver Historial</button>
+            </div>
+        </div>
+    `;
+
+    const existente = document.getElementById('panel-resultados-examen');
+    if (existente) existente.remove();
+    panelSituacion.insertAdjacentHTML('beforeend', htmlRevision);
+
+    document.getElementById('btn-repetir-examen').addEventListener('click', () => {
+        iniciarModoExamenOficial();
+    });
+
+    document.getElementById('btn-ver-historial').addEventListener('click', () => {
+        mostrarModalHistorial();
+    });
+}
+
+// ==========================================
+// 4. INTERFAZ DE SELECTOR DE MODO E HISTORIAL
+// ==========================================
+function crearBarraModoUI() {
+    actualizarActivoModoUI();
+}
+
+// Sincroniza el estado visual (tarjetas de modo + navegación) con tipoModoJuego,
+// sin recrear nodos: solo alterna clases y visibilidad.
+function actualizarActivoModoUI() {
+    const cardPractica = document.getElementById('modecard-practica');
+    const cardExamen = document.getElementById('modecard-examen');
+    const navPractica = document.getElementById('nav-practica');
+    const navExamen = document.getElementById('nav-examen');
+    const navInicio = document.getElementById('nav-inicio');
+    const relojEl = document.getElementById('reloj-examen');
+
+    const enExamen = tipoModoJuego === 'examen';
+
+    if (cardPractica) cardPractica.classList.toggle('is-activo', !enExamen);
+    if (cardExamen) cardExamen.classList.toggle('is-activo', enExamen);
+    if (navPractica) navPractica.classList.toggle('is-activo', !enExamen);
+    if (navExamen) navExamen.classList.toggle('is-activo', enExamen);
+    if (navInicio) navInicio.classList.toggle('is-activo', false);
+    if (relojEl) relojEl.style.display = enExamen ? 'inline-flex' : 'none';
+}
+
+async function guardarExamenEnNube(aciertos, total, porcentaje, segundos, detalle) {
+    if (!usuarioFirebaseActual || !window.refSimFirebase) return;
+    const { db, doc, setDoc, getDoc, updateDoc, arrayUnion } = window.refSimFirebase;
+    try {
+        const docRef = doc(db, "usuarios", usuarioFirebaseActual.uid);
+        const docSnap = await getDoc(docRef);
+        
+        const nuevoExamen = {
+            fecha: new Date().toISOString(),
+            aciertos,
+            total,
+            porcentaje,
+            tiempoSegundos: segundos,
+            detalle
+        };
+
+        if (!docSnap.exists()) {
+            await setDoc(docRef, { historialExamenes: [nuevoExamen] }, { merge: true });
+        } else {
+            await updateDoc(docRef, {
+                historialExamenes: arrayUnion(nuevoExamen)
+            });
+        }
+    } catch (e) {
+        console.error("Error al guardar historial en Firebase:", e);
+    }
+}
+
+async function mostrarModalHistorial() {
+    let modal = document.getElementById('modal-historial-examenes');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-historial-examenes';
+        modal.style.cssText = "position: fixed; inset: 0; z-index: 2000; background: rgba(3,8,6,0.8); display: flex; justify-content: center; align-items: center; padding: 20px;";
+        document.body.appendChild(modal);
+    }
+
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+        <div style="background: var(--panel); border: 1px solid var(--amarilla); border-radius: var(--radio-l); width: 100%; max-width: 480px; padding: 24px; position: relative; max-height: 80vh; display: flex; flexDirection: column;">
+            <button type="button" id="cerrar-modal-hist" style="position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.4rem; color: var(--tenue); cursor: pointer;">&times;</button>
+            <h3 style="font-family: var(--fuente-display); font-size: 1.4rem; color: var(--amarilla); margin-bottom: 12px;">📂 Historial de Exámenes</h3>
+            <div id="contenido-lista-historial" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px; padding-right: 4px;">
+                <p style="color: var(--tenue); text-align: center; padding: 20px;">Cargando tus exámenes...</p>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('cerrar-modal-hist').addEventListener('click', () => { modal.style.display = 'none'; });
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+    // Cargar desde Firebase o Local
+    let listaExamenes = [];
+    if (usuarioFirebaseActual && window.refSimFirebase) {
+        const { db, doc, getDoc } = window.refSimFirebase;
+        try {
+            const snap = await getDoc(doc(db, "usuarios", usuarioFirebaseActual.uid));
+            if (snap.exists() && snap.data().historialExamenes) {
+                listaExamenes = snap.data().historialExamenes;
+            }
+        } catch (e) {
+            console.error("Error al leer historial:", e);
+        }
+    }
+
+    const contenedorLista = document.getElementById('contenido-lista-historial');
+    if (listaExamenes.length === 0) {
+        contenedorLista.innerHTML = `<p style="color: var(--tenue); text-align: center; font-size: 0.9rem; padding: 20px;">No tienes exámenes registrados todavía. ¡Completa tu primer Examen Oficial de 25 preguntas!</p>`;
+        return;
+    }
+
+    let htmlExamenes = '';
+    listaExamenes.reverse().forEach((ex, idx) => {
+        let fechaFormateada = new Date(ex.fecha).toLocaleDateString() + ' ' + new Date(ex.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        let colorNota = ex.porcentaje >= 70 ? 'var(--verde-claro)' : 'var(--roja)';
+        htmlExamenes += `
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--linea); border-radius: var(--radio-s); padding: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <strong style="font-size: 0.9rem;">Examen #${listaExamenes.length - idx}</strong>
+                    <span style="color: ${colorNota}; font-weight: 700; font-size: 0.95rem;">${ex.porcentaje}% (${ex.aciertos}/${ex.total})</span>
+                </div>
+                <p style="color: var(--tenue); font-size: 0.78rem;">Fecha: ${fechaFormateada} | Tiempo: ${Math.floor(ex.tiempoSegundos/60)}m ${ex.tiempoSegundos%60}s</p>
+            </div>
+        `;
+    });
+    contenedorLista.innerHTML = htmlExamenes;
+}
+
+// ==========================================
+// 5. INTERFAZ Y TRADUCCIONES
+// ==========================================
 function actualizarMarcadorInterfaz() {
     const statPuntos = document.getElementById('stat-puntos');
     const statPrecision = document.getElementById('stat-precision');
@@ -852,13 +1273,23 @@ function actualizarMarcadorInterfaz() {
         : 0;
 
     if (statPuntos) statPuntos.textContent = usuarioState.puntos;
-    if (statPrecision) statPrecision.textContent = `${precisionCalculada}%`;
+    if (statPrecision) {
+        statPrecision.textContent = `${precisionCalculada}%`;
+        const statCard = statPrecision.closest('.stat');
+        if (statCard) statCard.style.setProperty('--valor-precision', `${precisionCalculada}%`);
+    }
     if (statRacha) statRacha.textContent = usuarioState.racha;
 }
 
 function aplicarTraducciones() {
     const t = traducciones[idiomaActual] || traducciones.es;
-    
+
+    // Traducciones genéricas por atributo data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const clave = el.getAttribute('data-i18n');
+        if (t[clave] !== undefined) el.textContent = t[clave];
+    });
+
     const tag = document.querySelector('.scorebug__tag');
     if (tag) tag.textContent = t.tagSimulador;
 
@@ -875,21 +1306,31 @@ function aplicarTraducciones() {
     const varText = document.querySelector('.monitor__bar span:last-child');
     if (varText) varText.textContent = t.varRepeticion;
 
+    // Traducir los botones de decisión del panel (icono + título + descripción + atajo)
     const botonesOpcion = document.querySelectorAll('.btn-opcion');
     if (botonesOpcion.length >= 8) {
-        botonesOpcion[0].innerHTML = `<span class="decision__glyph" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12.5L10 17.5L19 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> ${t.btnNoFalta}`;
-        botonesOpcion[1].innerHTML = `<span class="decision__glyph" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.2"/><path d="M12 7v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.3" r="1.15" fill="currentColor"/></svg></span> ${t.btnFalta}`;
-        botonesOpcion[2].innerHTML = `<span class="decision__card" aria-hidden="true"></span> ${t.btnAmarilla}`;
-        botonesOpcion[3].innerHTML = `<span class="decision__card" aria-hidden="true"></span> ${t.btnRoja}`;
-        botonesOpcion[4].innerHTML = `<span class="decision__card" aria-hidden="true" style="background:var(--papel)"></span> ${t.btnPenalti}`;
-        botonesOpcion[5].innerHTML = `<span class="decision__card" aria-hidden="true" style="background:var(--amarilla)"></span> ${t.btnPenaltiAmarilla}`;
-        botonesOpcion[6].innerHTML = `<span class="decision__glyph" aria-hidden="true">⚽</span> ${t.btnGol}`;
-        botonesOpcion[7].innerHTML = `<span class="decision__glyph" aria-hidden="true">🚩</span> ${t.btnFueraDeJuego}`;
+        const contenidoDecision = (glyphHtml, titulo, desc, tecla) => `
+            ${glyphHtml}
+            <span class="decision__texto">
+                <span class="decision__titulo">${titulo}</span>
+                <span class="decision__desc">${desc}</span>
+            </span>
+            <span class="decision__tecla" aria-hidden="true">${tecla}</span>
+        `;
+        botonesOpcion[0].innerHTML = contenidoDecision('<span class="decision__glyph" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12.5L10 17.5L19 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>', t.btnNoFalta, t.btnNoFaltaDesc, 1);
+        botonesOpcion[1].innerHTML = contenidoDecision('<span class="decision__glyph" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.2"/><path d="M12 7v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.3" r="1.15" fill="currentColor"/></svg></span>', t.btnFalta, t.btnFaltaDesc, 2);
+        botonesOpcion[2].innerHTML = contenidoDecision('<span class="decision__card" aria-hidden="true"></span>', t.btnAmarilla, t.btnAmarillaDesc, 3);
+        botonesOpcion[3].innerHTML = contenidoDecision('<span class="decision__card" aria-hidden="true"></span>', t.btnRoja, t.btnRojaDesc, 4);
+        botonesOpcion[4].innerHTML = contenidoDecision('<span class="decision__card" aria-hidden="true" style="background:var(--papel)"></span>', t.btnPenalti, t.btnPenaltiDesc, 5);
+        botonesOpcion[5].innerHTML = contenidoDecision('<span class="decision__card" aria-hidden="true" style="background:var(--amarilla)"></span>', t.btnPenaltiAmarilla, t.btnPenaltiAmarillaDesc, 6);
+        botonesOpcion[6].innerHTML = contenidoDecision('<span class="decision__glyph" aria-hidden="true">⚽</span>', t.btnGol, t.btnGolDesc, 7);
+        botonesOpcion[7].innerHTML = contenidoDecision('<span class="decision__glyph" aria-hidden="true">🚩</span>', t.btnFueraDeJuego, t.btnFueraDeJuegoDesc, 8);
     }
 
     const btnSig = document.getElementById('btn-nueva-situacion');
     if (btnSig) btnSig.textContent = t.btnSiguiente;
 
+    // Traducir la jugada que esté activa en pantalla en ese momento
     if (situacionActual) {
         const tituloSituacion = document.getElementById('situacion-titulo');
         const descripcionSituacion = document.getElementById('situacion-descripcion');
@@ -899,30 +1340,19 @@ function aplicarTraducciones() {
         if (descripcionSituacion) {
             descripcionSituacion.textContent = (idiomaActual === 'eu' && situacionActual.descripcionEu) ? situacionActual.descripcionEu : situacionActual.descripcion;
         }
+
+        const nuevoPrefix = tipoModoJuego === "examen"
+            ? (idiomaActual === 'eu' ? `Azterketa [${indiceExamenActual + 1}/${preguntasExamen.length}]` : `Examen [${indiceExamenActual + 1}/${preguntasExamen.length}]`)
+            : `${t.jugada} #${situacionActual.id}`;
+        const idSituacion = document.getElementById('situacion-id');
+        const idSituacionPanel = document.getElementById('situacion-id-panel');
+        if (idSituacion) idSituacion.textContent = nuevoPrefix;
+        if (idSituacionPanel) idSituacionPanel.textContent = nuevoPrefix;
+
+        actualizarMetaJugada(situacionActual);
     }
 
-    // --- Etiqueta de la jugada ---
-    const idSit = document.getElementById('situacion-id');
-    if (idSit && situacionActual) idSit.textContent = `${t.jugada} #${situacionActual.id}`;
-
-    // --- Modal de acceso ---
-    const fijar = (selector, propiedad, valor) => {
-        const el = document.querySelector(selector);
-        if (el) el[propiedad] = valor;
-    };
-    fijar('#auth-titulo', 'textContent', t.authTitulo);
-    fijar('.auth-card__intro', 'textContent', t.authIntro);
-    fijar('#user-email', 'placeholder', t.authEmail);
-    fijar('#user-password', 'placeholder', t.authPassword);
-    fijar('#btn-login', 'textContent', t.authLogin);
-    fijar('#btn-register', 'textContent', t.authRegister);
-    fijar('#btn-cerrar-sesion', 'textContent', t.authCerrarSesion);
-
-    // --- Publicidad y pie ---
-    document.querySelectorAll('.ad-slot__label').forEach(el => { el.textContent = t.adLabel; });
-    fijar('.footer-legal p', 'textContent', t.footer);
-
-    // --- Bandera activa ---
+    // Marcar visualmente la bandera activa
     document.querySelectorAll('#selector-idioma button').forEach(b => {
         const activo = b.getAttribute('data-lang') === idiomaActual;
         b.classList.toggle('is-activo', activo);
@@ -933,7 +1363,7 @@ function aplicarTraducciones() {
 }
 
 // ==========================================
-// 4. FIREBASE Y EVENTOS DOM
+// 6. FIREBASE Y EVENTOS DOM
 // ==========================================
 async function guardarProgresoNubeAuto() {
     if (usuarioFirebaseActual && window.refSimFirebase) {
@@ -986,6 +1416,7 @@ async function cargarProgresoNube(uid) {
 
 document.addEventListener("DOMContentLoaded", () => {
     actualizarMarcadorInterfaz();
+    crearBarraModoUI();
     cargarNuevaSituacion();
     aplicarTraducciones();
 
@@ -997,6 +1428,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const botonesOpcion = document.querySelectorAll('.btn-opcion');
     botonesOpcion.forEach(boton => {
         boton.addEventListener('click', evaluarDecision);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        const enCampoDeTexto = document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+        if (enCampoDeTexto) return;
+        const indice = parseInt(e.key, 10) - 1;
+        if (Number.isNaN(indice) || indice < 0 || indice >= botonesOpcion.length) return;
+        const boton = botonesOpcion[indice];
+        if (boton && !boton.disabled) boton.click();
     });
 
     const contenedorBanderas = document.getElementById("selector-idioma");
@@ -1021,9 +1461,57 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnCerrarAuth && modalAuth) {
         btnCerrarAuth.addEventListener("click", () => { modalAuth.style.display = "none"; });
     }
+
+    // --- MODAL DE AJUSTES ---
+    const modalAjustes = document.getElementById("ajustes-modal");
+    const btnCerrarAjustes = document.getElementById("btn-cerrar-ajustes");
+    if (btnCerrarAjustes && modalAjustes) {
+        btnCerrarAjustes.addEventListener("click", () => { modalAjustes.style.display = "none"; });
+    }
+
     window.addEventListener("click", (e) => {
         if (modalAuth && e.target === modalAuth) { modalAuth.style.display = "none"; }
+        if (modalAjustes && e.target === modalAjustes) { modalAjustes.style.display = "none"; }
     });
+
+    // --- NAVEGACIÓN PRINCIPAL ---
+    const navInicio = document.getElementById('nav-inicio');
+    const navPractica = document.getElementById('nav-practica');
+    const navExamen = document.getElementById('nav-examen');
+    const navEstadisticas = document.getElementById('nav-estadisticas');
+    const navAjustes = document.getElementById('nav-ajustes');
+
+    if (navInicio) navInicio.addEventListener('click', () => iniciarModoPractica());
+    if (navPractica) navPractica.addEventListener('click', () => iniciarModoPractica());
+    if (navExamen) navExamen.addEventListener('click', () => iniciarModoExamenOficial());
+    if (navEstadisticas) navEstadisticas.addEventListener('click', () => mostrarModalHistorial());
+    if (navAjustes) navAjustes.addEventListener('click', () => { if (modalAjustes) modalAjustes.style.display = 'flex'; });
+
+    // --- TARJETAS DE MODO ---
+    const cardPractica = document.getElementById('modecard-practica');
+    const cardExamen = document.getElementById('modecard-examen');
+    const cardPartidos = document.getElementById('modecard-partidos');
+
+    if (cardPractica) cardPractica.addEventListener('click', () => iniciarModoPractica());
+    if (cardExamen) cardExamen.addEventListener('click', () => iniciarModoExamenOficial());
+    if (cardPartidos) cardPartidos.addEventListener('click', () => mostrarModalHistorial());
+
+    // --- MONITOR: siguiente jugada rápida y pantalla completa ---
+    const btnJugadaSiguiente = document.getElementById('btn-jugada-siguiente');
+    if (btnJugadaSiguiente) btnJugadaSiguiente.addEventListener('click', () => cargarNuevaSituacion());
+
+    const btnFullscreen = document.getElementById('btn-fullscreen-monitor');
+    if (btnFullscreen) {
+        btnFullscreen.addEventListener('click', () => {
+            const monitorEl = document.querySelector('.monitor');
+            if (!monitorEl) return;
+            if (!document.fullscreenElement) {
+                monitorEl.requestFullscreen?.();
+            } else {
+                document.exitFullscreen?.();
+            }
+        });
+    }
 
     const verificarFirebaseInterval = setInterval(() => {
         if (window.refSimFirebase) {
@@ -1059,9 +1547,11 @@ function configurarAuthFirebase(modalAuth, btnAbrirAuth) {
 
             if (authContainer) {
                 let nombreCorto = user.email.split('@')[0];
+                authContainer.classList.add('cuenta-pill');
                 authContainer.innerHTML = `
-                    <span style="color: var(--amarilla); font-weight: 700; font-size: 0.85rem;">👤 ${nombreCorto}</span>
-                    <button id="btn-cerrar-sesion" style="background: #E63946; color: white; border: none; padding: 6px 10px; border-radius: var(--radio-s); font-weight: 700; cursor: pointer; font-size: 0.8rem;">${t().authCerrarSesion}</button>
+                    <span class="cuenta-pill__avatar" aria-hidden="true">👤</span>
+                    <span class="cuenta-pill__nombre">${nombreCorto}</span>
+                    <button id="btn-cerrar-sesion" class="cuenta-pill__salir">${t().authCerrarSesion}</button>
                 `;
                 document.getElementById("btn-cerrar-sesion").addEventListener("click", async () => {
                     await signOut(auth);
@@ -1070,8 +1560,8 @@ function configurarAuthFirebase(modalAuth, btnAbrirAuth) {
             }
         } else {
             usuarioFirebaseActual = null;
-            if (btnAbrirAuth) btnAbrirAuth.style.display = "block";
-            if (authContainer) authContainer.innerHTML = "";
+            if (btnAbrirAuth) btnAbrirAuth.style.display = "inline-flex";
+            if (authContainer) { authContainer.innerHTML = ""; authContainer.classList.remove('cuenta-pill'); }
             usuarioState = { puntos: 0, aciertos: 0, totalJugadas: 0, racha: 0, maxRacha: 0 };
             actualizarMarcadorInterfaz();
         }
